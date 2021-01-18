@@ -4,3 +4,38 @@
   height: 100%;
   overflow: hidden;
 }
+
+nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  mix-blend-mode: difference;
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 2em 0 0 2em;
+    display: flex;
+
+    li {
+      min-width: 3em;
+    }
+
+    a {
+      color: white;
+      text-decoration: none;
+      display: inline-flex;
+      width: 1.5em;
+      height: 1.5em;
+      align-items: center;
+      justify-content: center;
+    }
+
+    a.active {
+      background: white;
+      color: black;
+      border-radius: 100%;
+    }
+  }
+}

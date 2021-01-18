@@ -38,9 +38,9 @@ export class ImageTransition1Sketch {
 		const assets: Promise<any>[] = [
 			(new FileLoader()).loadAsync('assets/image-transition-1/_fragment.glsl'),
 			(new FileLoader()).loadAsync('assets/image-transition-1/_vertex.glsl'),
-			(new TextureLoader()).loadAsync('assets/image-transition-1/img1.jpg'),
-			(new TextureLoader()).loadAsync('assets/image-transition-1/img2.jpg'),
-			(new TextureLoader()).loadAsync('assets/image-transition-1/img3.jpg')
+			(new TextureLoader()).loadAsync('assets/shared-textures/img1.jpg'),
+			(new TextureLoader()).loadAsync('assets/shared-textures/img2.jpg'),
+			(new TextureLoader()).loadAsync('assets/shared-textures/img3.jpg')
 		];
 
 		Promise.all(assets).then((res) => {
