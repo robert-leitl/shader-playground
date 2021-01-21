@@ -4,13 +4,14 @@ import { Displace1Component } from "./displace-1/displace-1.component";
 import { Displace2Component } from "./displace-2/displace-2.component";
 import { ImageTransition1Component } from "./image-transition-1/image-transition-1.component";
 import { MouseDistortion1Component } from "./mouse-distortion-1/mouse-distortion-1.component";
+import { MouseDistortion2Component } from "./mouse-distortion-2/mouse-distortion-2.component";
 import { TestComponent } from "./test/test.component";
 
 export const routes: Routes = [
   {
     path: "",
     pathMatch: "full",
-    redirectTo: "4",
+    redirectTo: "5",
   },
   {
     path: "test",
@@ -42,6 +43,13 @@ export const routes: Routes = [
     component: Displace2Component,
     data: {
       label: "4",
+    },
+  },
+  {
+    path: "5",
+    component: MouseDistortion2Component,
+    data: {
+      label: "5",
     },
   },
 ];
