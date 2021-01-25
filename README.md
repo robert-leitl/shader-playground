@@ -21,3 +21,7 @@ Fragment shader distortions from: https://www.youtube.com/watch?v=DH1KqXQvICQ&li
 ### 5
 
 Another try on replicating the mouse effect from: https://billie.withyoutube.com/
+
+### 6
+
+Distorted sphere and particles from: https://www.youtube.com/watch?v=ZUFLahzwLww&list=PLswdBLT9llbheHhZdGNw9RehJP1kvpMHY&index=45

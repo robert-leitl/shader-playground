@@ -145,8 +145,6 @@ export class MouseDistortion2Sketch {
       const aspectX = aspect > 1 ? 1 : aspect;
       const aspectY = aspect > 1 ? aspect : 1;
 
-      console.log(aspectX, aspectY);
-
       for (let i = 0; i < this.dataTextureSize * this.dataTextureSize; ++i) {
         let r = this.dataTexture.image.data[i * 3];
         let g = this.dataTexture.image.data[i * 3 + 1];

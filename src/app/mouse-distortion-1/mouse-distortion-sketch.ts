@@ -86,7 +86,7 @@ export class MouseDistortionSketch {
 
     this.updateSize();
 
-    this.renderer.domElement.onmousemove = (e) => {
+    this.renderer.domElement.onpointermove = (e) => {
       this.mousePos.x = e.clientX;
       this.mousePos.y = this.renderer.domElement.offsetHeight - e.clientY;
     };

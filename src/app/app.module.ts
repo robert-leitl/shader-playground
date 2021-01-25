@@ -8,6 +8,7 @@ import { Displace2Component } from "./displace-2/displace-2.component";
 import { ImageTransition1Component } from "./image-transition-1/image-transition-1.component";
 import { MouseDistortion1Component } from "./mouse-distortion-1/mouse-distortion-1.component";
 import { MouseDistortion2Component } from "./mouse-distortion-2/mouse-distortion-2.component";
+import { Particles1Component } from "./particles-1/particles-1.component";
 import { TestComponent } from "./test/test.component";
 
 @NgModule({
@@ -18,6 +19,7 @@ import { TestComponent } from "./test/test.component";
     MouseDistortion1Component,
     Displace1Component,
     Displace2Component,
+    Particles1Component,
     MouseDistortion2Component,
   ],
   imports: [BrowserModule, AppRoutingModule],
