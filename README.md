@@ -25,3 +25,8 @@ Another try on replicating the mouse effect from: https://billie.withyoutube.com
 ### 6
 
 Distorted sphere and particles from: https://www.youtube.com/watch?v=ZUFLahzwLww&list=PLswdBLT9llbheHhZdGNw9RehJP1kvpMHY&index=45
+
+
+### 7 
+
+Instanced Mesh, points and lines from: https://www.youtube.com/watch?v=0Zji936v3yg&list=PLswdBLT9llbheHhZdGNw9RehJP1kvpMHY&index=43
