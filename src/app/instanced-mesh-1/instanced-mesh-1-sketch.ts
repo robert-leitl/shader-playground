@@ -58,6 +58,8 @@ export class InstancedMesh1Sketch {
     private mouse: Vector2 = new Vector2();
     private mouseFollower: Vector2 = new Vector2();
 
+    private isDestroyed: boolean = false;
+
     constructor(container: HTMLElement) {
         this.container = container;
 
@@ -155,6 +157,8 @@ export class InstancedMesh1Sketch {
     }
 
     public animate(): void {
+        if (this.isDestroyed) return;
+
         //this.controls.update();
 
         this.mouseFollower.x += (this.mouse.x - this.mouseFollower.x) / 15;
@@ -325,5 +329,9 @@ export class InstancedMesh1Sketch {
         } else {
             return new Vector2(1, imgAspect / containerAspect);
         }
+    }
+
+    public destroy(): void {
+        this.isDestroyed = true;
     }
 }

@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
-import { MouseDistortionSketch } from './mouse-distortion-sketch';
+import { RayMarching1Sketch } from './ray-marching-1-sketch';
 
 @Component({
     selector: 'app-test',
@@ -18,19 +18,22 @@ import { MouseDistortionSketch } from './mouse-distortion-sketch';
     styles: [
         `
             app-test {
-                display: block;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 width: 100%;
                 height: 100%;
                 overflow: hidden;
+                touch-action: none;
+                background: black;
             }
         `
     ],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class MouseDistortion1Component
-    implements OnInit, AfterViewInit, OnDestroy {
-    private sketch: MouseDistortionSketch;
+export class RayMarching1Component implements OnInit, AfterViewInit, OnDestroy {
+    private sketch: RayMarching1Sketch;
 
     private _destroyed$: Subject<boolean> = new Subject<boolean>();
 
@@ -39,9 +42,7 @@ export class MouseDistortion1Component
     ngOnInit(): void {}
 
     ngAfterViewInit(): void {
-        this.sketch = new MouseDistortionSketch(
-            this.hostElementRef.nativeElement
-        );
+        this.sketch = new RayMarching1Sketch(this.hostElementRef.nativeElement);
         this.sketch.oninit = () => {
             this.ngZone.runOutsideAngular(() => this.sketch.animate());
 

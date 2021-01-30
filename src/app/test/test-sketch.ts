@@ -26,6 +26,8 @@ export class TestSketch {
     private fragmentShader: string;
     private t1: Texture;
 
+    private isDestroyed: boolean = false;
+
     constructor(container: HTMLElement) {
         this.container = container;
 
@@ -105,6 +107,8 @@ export class TestSketch {
     }
 
     public animate(): void {
+        if (this.isDestroyed) return;
+
         this.controls.update();
         this.render();
 
@@ -114,5 +118,9 @@ export class TestSketch {
     public render(): void {
         this.uniforms.u_time.value += 0.05;
         this.renderer.render(this.scene, this.camera);
+    }
+
+    public destroy(): void {
+        this.isDestroyed = true;
     }
 }
