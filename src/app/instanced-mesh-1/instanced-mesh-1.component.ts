@@ -13,11 +13,11 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
 import { InstancedMesh1Sketch } from './instanced-mesh-1-sketch';
 
 @Component({
-    selector: 'app-test',
+    selector: 'instanced-mesh-1',
     template: ``,
     styles: [
         `
-            app-test {
+            instanced-mesh-1 {
                 display: block;
                 width: 100%;
                 height: 100%;

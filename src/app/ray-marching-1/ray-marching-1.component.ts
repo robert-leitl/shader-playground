@@ -13,11 +13,11 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
 import { RayMarching1Sketch } from './ray-marching-1-sketch';
 
 @Component({
-    selector: 'app-test',
+    selector: 'ray-marching-1',
     template: ``,
     styles: [
         `
-            app-test {
+            ray-marching-1 {
                 display: flex;
                 align-items: center;
                 justify-content: center;

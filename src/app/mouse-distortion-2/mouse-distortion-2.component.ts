@@ -13,11 +13,11 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
 import { MouseDistortion2Sketch } from './mouse-distortion-2-sketch';
 
 @Component({
-    selector: 'app-test',
+    selector: 'mouse-distortion-2',
     template: ``,
     styles: [
         `
-            app-test {
+            mouse-distortion-2 {
                 display: block;
                 width: 100%;
                 height: 100%;

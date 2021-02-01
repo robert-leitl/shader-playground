@@ -13,7 +13,7 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
 import { ImageTransition1Sketch } from './image-transition-1-sketch';
 
 @Component({
-    selector: 'app-test',
+    selector: 'image-transition-1',
     template: `
         <div (pointerover)="onMouseOver($event)">
             <a></a>
@@ -23,7 +23,7 @@ import { ImageTransition1Sketch } from './image-transition-1-sketch';
     `,
     styles: [
         `
-            app-test {
+            image-transition-1 {
                 width: 100%;
                 height: 100%;
                 overflow: hidden;

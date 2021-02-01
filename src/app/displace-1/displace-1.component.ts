@@ -13,11 +13,11 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
 import { Displace1Sketch } from './displace-1-sketch';
 
 @Component({
-    selector: 'app-test',
+    selector: 'displace-1',
     template: ``,
     styles: [
         `
-            app-test {
+            displace-1 {
                 display: block;
                 width: 100%;
                 height: 100%;

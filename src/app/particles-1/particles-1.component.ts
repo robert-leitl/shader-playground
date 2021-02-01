@@ -13,11 +13,11 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
 import { Particles1Sketch } from './particles-1-sketch';
 
 @Component({
-    selector: 'app-test',
+    selector: 'particles-1',
     template: ``,
     styles: [
         `
-            app-test {
+            particles-1 {
                 display: block;
                 width: 100%;
                 height: 100%;
