@@ -34,3 +34,7 @@ Instanced Mesh, points and lines from: https://www.youtube.com/watch?v=0Zji936v3
 ### 8
 
 Raymarching exercise from: https://www.youtube.com/watch?v=afc8qabsGYg&list=PLswdBLT9llbheHhZdGNw9RehJP1kvpMHY&index=40
+
+### 9
+
+Travelling particles from: https://www.youtube.com/watch?v=MnKKetZZi8g

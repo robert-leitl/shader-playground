@@ -10,6 +10,7 @@ import { InstancedMesh1Component } from './instanced-mesh-1/instanced-mesh-1.com
 import { MouseDistortion1Component } from './mouse-distortion-1/mouse-distortion-1.component';
 import { MouseDistortion2Component } from './mouse-distortion-2/mouse-distortion-2.component';
 import { Particles1Component } from './particles-1/particles-1.component';
+import { Particles2Component } from './particles-2/particles-2.component';
 import { RayMarching1Component } from './ray-marching-1/ray-marching-1.component';
 import { TestComponent } from './test/test.component';
 
@@ -24,6 +25,7 @@ import { TestComponent } from './test/test.component';
         Particles1Component,
         InstancedMesh1Component,
         RayMarching1Component,
+        Particles2Component,
         MouseDistortion2Component
     ],
     imports: [BrowserModule, AppRoutingModule],
