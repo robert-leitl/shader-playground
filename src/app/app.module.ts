@@ -11,6 +11,7 @@ import { MouseDistortion1Component } from './mouse-distortion-1/mouse-distortion
 import { MouseDistortion2Component } from './mouse-distortion-2/mouse-distortion-2.component';
 import { Particles1Component } from './particles-1/particles-1.component';
 import { Particles2Component } from './particles-2/particles-2.component';
+import { Particles3Component } from './particles-3/particles-3.component';
 import { RayMarching1Component } from './ray-marching-1/ray-marching-1.component';
 import { TestComponent } from './test/test.component';
 
@@ -26,7 +27,8 @@ import { TestComponent } from './test/test.component';
         InstancedMesh1Component,
         RayMarching1Component,
         Particles2Component,
-        MouseDistortion2Component
+        MouseDistortion2Component,
+        Particles3Component
     ],
     imports: [BrowserModule, AppRoutingModule],
     providers: [],

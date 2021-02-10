@@ -30,11 +30,11 @@ import { ImageTransition1Sketch } from './image-transition-1-sketch';
                 display: block;
             }
 
-            app-test canvas {
+            image-transition-1 canvas {
                 position: absolute;
             }
 
-            app-test div {
+            image-transition-1 div {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -44,7 +44,7 @@ import { ImageTransition1Sketch } from './image-transition-1-sketch';
                 display: flex;
             }
 
-            app-test a {
+            image-transition-1 a {
                 flex: 1;
             }
         `

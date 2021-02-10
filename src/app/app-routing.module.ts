@@ -8,6 +8,7 @@ import { MouseDistortion1Component } from './mouse-distortion-1/mouse-distortion
 import { MouseDistortion2Component } from './mouse-distortion-2/mouse-distortion-2.component';
 import { Particles1Component } from './particles-1/particles-1.component';
 import { Particles2Component } from './particles-2/particles-2.component';
+import { Particles3Component } from './particles-3/particles-3.component';
 import { RayMarching1Component } from './ray-marching-1/ray-marching-1.component';
 import { TestComponent } from './test/test.component';
 
@@ -15,7 +16,7 @@ export const routes: Routes = [
     {
         path: '',
         pathMatch: 'full',
-        redirectTo: '9'
+        redirectTo: '10'
     },
     {
         path: 'test',
@@ -82,6 +83,13 @@ export const routes: Routes = [
         component: Particles2Component,
         data: {
             label: '9'
+        }
+    },
+    {
+        path: '10',
+        component: Particles3Component,
+        data: {
+            label: '10'
         }
     }
 ];
