@@ -14,7 +14,14 @@ import { Particles3Sketch } from './particles-3-sketch';
 
 @Component({
     selector: 'app-particles-3',
-    template: ``,
+    template: `
+        <button
+            (pointerenter)="onCtaPointerEnter()"
+            (pointerleave)="onCtaPointerLeave()"
+        >
+            CTA
+        </button>
+    `,
     styles: [
         `
             app-particles-3 {
@@ -22,6 +29,22 @@ import { Particles3Sketch } from './particles-3-sketch';
                 width: 100%;
                 height: 100%;
                 overflow: hidden;
+            }
+
+            button {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: #eeeeee;
+                border: none;
+                font-size: 2em;
+                font-weight: bold;
+                border-radius: 2em;
+                outline: none;
+                padding: 0.5em;
+                cursor: pointer;
+                box-shadow: rgba(255, 255, 255, 0.5) 0px 0px 20px;
             }
         `
     ],
@@ -52,5 +75,13 @@ export class Particles3Component implements OnInit, AfterViewInit, OnDestroy {
         this.sketch.destroy();
         this._destroyed$.next(true);
         this._destroyed$.complete();
+    }
+
+    onCtaPointerEnter(): void {
+        this.sketch.focus = true;
+    }
+
+    onCtaPointerLeave(): void {
+        this.sketch.focus = false;
     }
 }

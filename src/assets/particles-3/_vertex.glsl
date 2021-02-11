@@ -1,9 +1,11 @@
 attribute float a_instanceValue;
 attribute vec4 a_imageColor;
+attribute vec2 a_index;
 
 varying vec2 v_uv;
 varying float v_instanceValue;
 varying vec4 v_imageColor;
+varying vec2 v_index;
 
 uniform float u_time;
 uniform float u_noiseStrength;
@@ -84,16 +86,21 @@ float cnoise(vec3 P){
 }
 
 void main() {
+    // set the varyings used by the fragment shader
     v_uv = uv;
     v_instanceValue = a_instanceValue;
-    v_imageColor = a_imageColor / 255.;
+    v_imageColor = a_imageColor;
+    v_index = a_index;
 
+    // calculate the noise for each instance
     float noise = cnoise(vec3(5. * instanceMatrix[3].x, 5. * instanceMatrix[3].y, u_time / 12.));
     noise = noise / 2. + 0.5;
+    // mix the noise with the image color by its strength
     v_imageColor = mix(v_imageColor, vec4(noise), u_noiseStrength);
 
+    // z-offset by the value (mouse follower) and noise
     vec3 pos = position;
-    pos.z += v_instanceValue * 0.05;
+    pos.z += (v_instanceValue) * 0.05 + noise * (u_noiseStrength - .1) * 0.5;
 
     gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
 }

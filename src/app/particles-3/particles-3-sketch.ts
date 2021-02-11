@@ -47,7 +47,8 @@ export class Particles3Sketch {
     private prevMousePos: Vector2;
     private mousePos: Vector2;
 
-    private noiseStrength: number = 0.1;
+    private noiseStrength: number = 1;
+    private targetNoiseStrength: number = 1;
 
     private isDestroyed: boolean = false;
 
@@ -87,7 +88,7 @@ export class Particles3Sketch {
     }
 
     private init(): void {
-        this.initDatGui();
+        //this.initDatGui();
 
         this.camera = new PerspectiveCamera(
             45,
@@ -95,9 +96,11 @@ export class Particles3Sketch {
             0.1,
             100
         );
-        this.camera.position.z = 1;
+        this.camera.position.z = 0.9;
         this.scene = new Scene();
-        this.renderer = new WebGLRenderer();
+        this.renderer = new WebGLRenderer({
+            antialias: false
+        });
         this.renderer.setPixelRatio(window.devicePixelRatio);
 
         this.initInstances();
@@ -136,8 +139,8 @@ export class Particles3Sketch {
 
     private initInstances(): void {
         const geometry = new PlaneBufferGeometry(
-            this.CELL_SIZE,
-            this.CELL_SIZE
+            this.CELL_SIZE * 0.95,
+            this.CELL_SIZE * 0.95
         );
         this.instanceMaterial = new ShaderMaterial({
             uniforms: {
@@ -161,6 +164,9 @@ export class Particles3Sketch {
             totalInstanceCount
         );
 
+        const instanceIndex: Float32Array = new Float32Array(
+            totalInstanceCount * 2
+        );
         let count = 0;
         for (let x = 0; x < this.INSTANCE_COLUMNS; x++) {
             for (let y = 0; y < this.INSTANCE_ROWS; y++) {
@@ -169,12 +175,21 @@ export class Particles3Sketch {
                     y * this.CELL_SIZE,
                     0
                 );
+                instanceIndex.set(
+                    [x / this.INSTANCE_COLUMNS, y / this.INSTANCE_ROWS],
+                    count * 2
+                );
+
                 this.instanceDummy.updateMatrix();
                 this.instanceMesh.setMatrixAt(count, this.instanceDummy.matrix);
                 count++;
             }
         }
         this.instanceMesh.instanceMatrix.needsUpdate = true;
+        (this.instanceMesh.geometry as PlaneBufferGeometry).setAttribute(
+            'a_index',
+            new InstancedBufferAttribute(instanceIndex, 2)
+        );
 
         // add the image values as attribute
         const ctx = this.imageCanvas.getContext('2d');
@@ -194,10 +209,10 @@ export class Particles3Sketch {
                     j + (this.INSTANCE_ROWS - k - 1) * this.INSTANCE_COLUMNS;
                 imageDataArray.set(
                     [
-                        imageData.data[srcIndex * 4],
-                        imageData.data[srcIndex * 4 + 1],
-                        imageData.data[srcIndex * 4 + 2],
-                        imageData.data[srcIndex * 4 + 3]
+                        imageData.data[srcIndex * 4] / 255,
+                        imageData.data[srcIndex * 4 + 1] / 255,
+                        imageData.data[srcIndex * 4 + 2] / 255,
+                        imageData.data[srcIndex * 4 + 3] / 255
                     ],
                     index * 4
                 );
@@ -235,7 +250,19 @@ export class Particles3Sketch {
     public animate(): void {
         if (this.isDestroyed) return;
 
+        // animate the noise strength
+        this.noiseStrength +=
+            (this.targetNoiseStrength - this.noiseStrength) / 12;
         this.instanceMaterial.uniforms.u_noiseStrength.value = this.noiseStrength;
+
+        // animate the mesh rotation
+        if (this.mousePos) {
+            this.scene.rotation.y +=
+                (this.mousePos.x / 15 - this.scene.rotation.y) / 10;
+            this.scene.rotation.x +=
+                (-this.mousePos.y / 15 - this.scene.rotation.x) / 10;
+        }
+
         this.animateInstances();
 
         this.controls.update();
@@ -276,7 +303,7 @@ export class Particles3Sketch {
             for (let i = 0; i < this.instanceValue.length; ++i) {
                 let v = this.instanceValue[i];
 
-                v *= 0.97;
+                v *= 0.98;
 
                 const px = Math.floor(i / this.INSTANCE_ROWS);
                 const py = i - px * this.INSTANCE_ROWS;
@@ -303,5 +330,9 @@ export class Particles3Sketch {
 
     public destroy(): void {
         this.isDestroyed = true;
+    }
+
+    public set focus(value: boolean) {
+        this.targetNoiseStrength = value ? 0.18 : 1;
     }
 }
