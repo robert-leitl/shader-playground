@@ -1,4 +1,5 @@
 import {
+    AdditiveBlending,
     BufferAttribute,
     FileLoader,
     InstancedBufferAttribute,
@@ -17,6 +18,7 @@ import {
     WebGLRenderer
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import * as dat from 'dat.gui';
 
 export class Particles3Sketch {
     public oninit: Function;
@@ -31,8 +33,8 @@ export class Particles3Sketch {
     private instanceFragmentShader: string;
     private instanceMaterial: ShaderMaterial;
     private instanceMesh: InstancedMesh;
-    private INSTANCE_ROWS = 50;
-    private INSTANCE_COLUMNS = 50;
+    private INSTANCE_ROWS = 60;
+    private INSTANCE_COLUMNS = 80;
     private CELL_SIZE = 1 / Math.max(this.INSTANCE_ROWS, this.INSTANCE_COLUMNS);
     private instanceDummy: Object3D = new Object3D();
     private instanceValue: Float32Array = new Float32Array(
@@ -45,6 +47,8 @@ export class Particles3Sketch {
     private prevMousePos: Vector2;
     private mousePos: Vector2;
 
+    private noiseStrength: number = 0.1;
+
     private isDestroyed: boolean = false;
 
     constructor(container: HTMLElement) {
@@ -53,7 +57,7 @@ export class Particles3Sketch {
         const assets: Promise<any>[] = [
             new FileLoader().loadAsync('assets/particles-3/_fragment.glsl'),
             new FileLoader().loadAsync('assets/particles-3/_vertex.glsl'),
-            new TextureLoader().loadAsync('assets/particles-3/eye1.jpg'),
+            new TextureLoader().loadAsync('assets/particles-3/eye3.jpg'),
             new TextureLoader().loadAsync('assets/particles-3/chars.png')
         ];
 
@@ -74,18 +78,24 @@ export class Particles3Sketch {
                 this.INSTANCE_ROWS
             );
 
+            /*this.imageCanvas.style.position = 'absolute';
+            this.imageCanvas.style.top = '0';
+            document.body.appendChild(this.imageCanvas);*/
+
             this.init();
         });
     }
 
     private init(): void {
+        this.initDatGui();
+
         this.camera = new PerspectiveCamera(
             45,
             this.container.offsetWidth / this.container.offsetHeight,
             0.1,
             100
         );
-        this.camera.position.z = 2;
+        this.camera.position.z = 1;
         this.scene = new Scene();
         this.renderer = new WebGLRenderer();
         this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -117,6 +127,13 @@ export class Particles3Sketch {
         if (this.oninit) this.oninit();
     }
 
+    private initDatGui(): void {
+        const gui = new dat.GUI();
+        gui.add(this, 'noiseStrength', 0.1, 1, 0.01);
+
+        document.body.appendChild(gui.domElement);
+    }
+
     private initInstances(): void {
         const geometry = new PlaneBufferGeometry(
             this.CELL_SIZE,
@@ -127,11 +144,13 @@ export class Particles3Sketch {
                 u_time: { type: '', value: 1.0 } as any,
                 u_resolution: { type: 'v2', value: new Vector2() } as any,
                 u_mouse: { type: 'v2', value: new Vector2() } as any,
-                u_charsTexture: { type: 't', value: this.charsTexture } as any
+                u_charsTexture: { type: 't', value: this.charsTexture } as any,
+                u_noiseStrength: { type: 'f', value: this.noiseStrength } as any
             },
             vertexShader: this.instanceVertexShader,
             fragmentShader: this.instanceFragmentShader,
-            transparent: true
+            transparent: true,
+            blending: AdditiveBlending
         });
 
         const totalInstanceCount = this.INSTANCE_COLUMNS * this.INSTANCE_ROWS;
@@ -168,20 +187,22 @@ export class Particles3Sketch {
         const imageDataArray: Float32Array = new Float32Array(
             this.INSTANCE_ROWS * this.INSTANCE_COLUMNS * 4
         );
+        let index = 0;
         for (let j = 0; j < this.INSTANCE_COLUMNS; j++) {
             for (let k = 0; k < this.INSTANCE_ROWS; k++) {
-                let index = j * this.INSTANCE_ROWS + k;
-                let targetIndex =
-                    this.INSTANCE_COLUMNS - j - 1 + k * this.INSTANCE_COLUMNS;
+                let srcIndex =
+                    j + (this.INSTANCE_ROWS - k - 1) * this.INSTANCE_COLUMNS;
                 imageDataArray.set(
                     [
-                        imageData.data[index * 4],
-                        imageData.data[index * 4 + 1],
-                        imageData.data[index * 4 + 2],
-                        imageData.data[index * 4 + 3]
+                        imageData.data[srcIndex * 4],
+                        imageData.data[srcIndex * 4 + 1],
+                        imageData.data[srcIndex * 4 + 2],
+                        imageData.data[srcIndex * 4 + 3]
                     ],
-                    targetIndex * 4
+                    index * 4
                 );
+
+                index++;
             }
         }
 
@@ -214,6 +235,7 @@ export class Particles3Sketch {
     public animate(): void {
         if (this.isDestroyed) return;
 
+        this.instanceMaterial.uniforms.u_noiseStrength.value = this.noiseStrength;
         this.animateInstances();
 
         this.controls.update();
@@ -223,15 +245,6 @@ export class Particles3Sketch {
     }
 
     private animateInstances(): void {
-        /*let count = 0;
-        for (let x = 0; x < this.INSTANCE_COLUMNS; x++) {
-            for (let y = 0; y < this.INSTANCE_ROWS; y++) {
-                // update the brightness value of each instance
-                this.instanceValue.set([0], count);
-                count++;
-            }
-        }*/
-
         this.animatePointerTrail();
 
         (this.instanceMesh.geometry as PlaneBufferGeometry).setAttribute(
@@ -263,17 +276,17 @@ export class Particles3Sketch {
             for (let i = 0; i < this.instanceValue.length; ++i) {
                 let v = this.instanceValue[i];
 
-                v *= 0.95;
+                v *= 0.97;
 
-                const py = Math.floor(i / this.INSTANCE_ROWS);
-                const px = i - py * this.INSTANCE_COLUMNS;
-                const dx = (mX - py) * aspectX;
-                const dy = (mY - px) / aspectY;
+                const px = Math.floor(i / this.INSTANCE_ROWS);
+                const py = i - px * this.INSTANCE_ROWS;
+                const dx = (mX - px) * aspectX;
+                const dy = (mY - py) / aspectY;
                 const d = Math.sqrt(dx * dx + dy * dy);
                 const f = 1 - d / radius;
 
                 if (d < radius && Math.abs(dmX) > 0 && Math.abs(dmY) > 0) {
-                    v += f * 0.2;
+                    v += f * 0.1;
                 }
 
                 this.instanceValue[i] = Math.min(v, 0.99);
