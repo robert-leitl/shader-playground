@@ -33,7 +33,7 @@ export class Particles3Sketch {
     private instanceFragmentShader: string;
     private instanceMaterial: ShaderMaterial;
     private instanceMesh: InstancedMesh;
-    private INSTANCE_ROWS = 60;
+    private INSTANCE_ROWS = 80;
     private INSTANCE_COLUMNS = 80;
     private CELL_SIZE = 1 / Math.max(this.INSTANCE_ROWS, this.INSTANCE_COLUMNS);
     private instanceDummy: Object3D = new Object3D();
@@ -58,7 +58,7 @@ export class Particles3Sketch {
         const assets: Promise<any>[] = [
             new FileLoader().loadAsync('assets/particles-3/_fragment.glsl'),
             new FileLoader().loadAsync('assets/particles-3/_vertex.glsl'),
-            new TextureLoader().loadAsync('assets/particles-3/eye3.jpg'),
+            new TextureLoader().loadAsync('assets/particles-3/hand1.jpg'),
             new TextureLoader().loadAsync('assets/particles-3/chars.png')
         ];
 
@@ -96,7 +96,7 @@ export class Particles3Sketch {
             0.1,
             100
         );
-        this.camera.position.z = 0.9;
+        this.camera.position.z = 1.1;
         this.scene = new Scene();
         this.renderer = new WebGLRenderer({
             antialias: false
@@ -252,7 +252,7 @@ export class Particles3Sketch {
 
         // animate the noise strength
         this.noiseStrength +=
-            (this.targetNoiseStrength - this.noiseStrength) / 12;
+            (this.targetNoiseStrength - this.noiseStrength) / 8;
         this.instanceMaterial.uniforms.u_noiseStrength.value = this.noiseStrength;
 
         // animate the mesh rotation
@@ -303,7 +303,7 @@ export class Particles3Sketch {
             for (let i = 0; i < this.instanceValue.length; ++i) {
                 let v = this.instanceValue[i];
 
-                v *= 0.98;
+                v *= 0.96;
 
                 const px = Math.floor(i / this.INSTANCE_ROWS);
                 const py = i - px * this.INSTANCE_ROWS;

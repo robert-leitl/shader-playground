@@ -19,7 +19,7 @@ import { Particles3Sketch } from './particles-3-sketch';
             (pointerenter)="onCtaPointerEnter()"
             (pointerleave)="onCtaPointerLeave()"
         >
-            CTA
+            atuin.media
         </button>
     `,
     styles: [

@@ -93,14 +93,16 @@ void main() {
     v_index = a_index;
 
     // calculate the noise for each instance
-    float noise = cnoise(vec3(5. * instanceMatrix[3].x, 5. * instanceMatrix[3].y, u_time / 12.));
+    float noise = cnoise(vec3(4. * instanceMatrix[3].x, 4. * instanceMatrix[3].y, u_time / 12.));
     noise = noise / 2. + 0.5;
     // mix the noise with the image color by its strength
     v_imageColor = mix(v_imageColor, vec4(noise), u_noiseStrength);
 
     // z-offset by the value (mouse follower) and noise
     vec3 pos = position;
-    pos.z += (v_instanceValue) * 0.05 + noise * (u_noiseStrength - .1) * 0.5;
+    float dist = length(v_index * 2. - 1.);
+    pos.z += (v_instanceValue) * 0.05 + noise * (u_noiseStrength - .1) * 0.5 + (1. - u_noiseStrength) * dist * 0.2;
+
 
     gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
 }

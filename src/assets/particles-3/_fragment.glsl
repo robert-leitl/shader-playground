@@ -14,8 +14,9 @@ void main() {
     vec2 uv = v_uv;
 
     // gradient colors
-    vec3 colorA = vec3(62., 196., 229.) / 255.;
-    vec3 colorB = vec3(103., 255., 254.) / 255.;
+    vec3 colorAccent1 = vec3(62., 196., 229.) / 255.;
+    vec3 colorAccent2 = vec3(103., 255., 254.) / 255.;
+    vec3 colorAccent = mix(colorAccent2, colorAccent1, v_index.y / .4);
 
     // get the brightness value from the color image
     float imageValue = (v_imageColor.r + v_imageColor.g + v_imageColor.b) / 3.;
@@ -25,7 +26,7 @@ void main() {
 
     // get the color from the instance index
     vec2 index = v_index * 2. - 1.;
-    vec3 color = mix(colorB, colorA, v_index.y / .4) * (smoothstep(0.8, 0.3, length(index)) + (1. - u_noiseStrength));
+    vec3 color = colorAccent * (smoothstep(0.8, 0.3, length(index)) + (1. - u_noiseStrength));
 
     // map the uv to the char corresponding to the brightness value
     uv.x = uv.x / CHAR_COUNT + floor(value * CHAR_COUNT) * 1. / CHAR_COUNT;
@@ -33,14 +34,14 @@ void main() {
     charsMap.rgb *= color;
 
     // dim the char according to its value
-    charsMap.a *= 0.7 + value * 0.5;
+    charsMap.a *= 0.7 + value * 0.7;
 
     // draw the background rectangle
-    vec4 bgColor = vec4(color, value * 0.7);
+    vec4 bgColor = vec4(color, value * 0.6);
     bgColor.rgb *= color;
 
     gl_FragColor = charsMap + bgColor;
 
     // overall opacity factor
-    gl_FragColor.a *= 0.4;
+    gl_FragColor.a *= 0.4 + (1. - u_noiseStrength) * 0.9;
 }
