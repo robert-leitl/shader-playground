@@ -1,20 +1,25 @@
 import {
     AdditiveBlending,
+    Box3,
     BufferAttribute,
     FileLoader,
     InstancedBufferAttribute,
     InstancedMesh,
     Mesh,
+    MeshBasicMaterial,
     Object3D,
     PerspectiveCamera,
+    Plane,
     PlaneBufferGeometry,
     Points,
+    Raycaster,
     Scene,
     Shader,
     ShaderMaterial,
     Texture,
     TextureLoader,
     Vector2,
+    Vector3,
     WebGLRenderer
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -27,25 +32,27 @@ export class Particles3Sketch {
     private camera: PerspectiveCamera;
     private scene: Scene;
     private renderer: WebGLRenderer;
-    private controls: OrbitControls;
+    //private controls: OrbitControls;
+    private raycaster: Raycaster;
 
     private instanceVertexShader: string;
     private instanceFragmentShader: string;
     private instanceMaterial: ShaderMaterial;
     private instanceMesh: InstancedMesh;
-    private INSTANCE_ROWS = 80;
-    private INSTANCE_COLUMNS = 80;
-    private CELL_SIZE = 1 / Math.max(this.INSTANCE_ROWS, this.INSTANCE_COLUMNS);
+    private instanceRows = 60;
+    private instanceColumns = 80;
+    private cellSize = 1 / Math.max(this.instanceRows, this.instanceColumns);
     private instanceDummy: Object3D = new Object3D();
-    private instanceValue: Float32Array = new Float32Array(
-        this.INSTANCE_ROWS * this.INSTANCE_COLUMNS
-    );
+    private instanceValue: Float32Array;
     private imageTexture: Texture;
     private imageCanvas: HTMLCanvasElement;
     private charsTexture: Texture;
 
-    private prevMousePos: Vector2;
-    private mousePos: Vector2;
+    private raycasterPlaneMesh: Mesh;
+
+    private pointerPosition: Vector2 = new Vector2();
+    private planePosition: Vector3 = new Vector3();
+    private prevPlanePosition: Vector3;
 
     private noiseStrength: number = 1;
     private targetNoiseStrength: number = 1;
@@ -54,6 +61,21 @@ export class Particles3Sketch {
 
     constructor(container: HTMLElement) {
         this.container = container;
+
+        const aspect = this.container.offsetWidth / this.container.offsetHeight;
+        const maxCells = 100;
+        if (aspect > 1) {
+            this.instanceRows = Math.floor(maxCells / aspect);
+            this.instanceColumns = maxCells;
+        } else {
+            this.instanceRows = maxCells;
+            this.instanceColumns = Math.floor(maxCells * aspect);
+        }
+        this.cellSize = 1 / Math.max(this.instanceRows, this.instanceColumns);
+        this.instanceValue = new Float32Array(
+            this.instanceRows * this.instanceColumns
+        );
+        console.log(this.instanceColumns, this.instanceRows);
 
         const assets: Promise<any>[] = [
             new FileLoader().loadAsync('assets/particles-3/_fragment.glsl'),
@@ -68,21 +90,6 @@ export class Particles3Sketch {
             this.imageTexture = res[2];
             this.charsTexture = res[3];
 
-            // draw the image to canvas
-            this.imageCanvas = document.createElement('canvas');
-            const ctx = this.imageCanvas.getContext('2d');
-            ctx.drawImage(
-                this.imageTexture.image,
-                0,
-                0,
-                this.INSTANCE_COLUMNS,
-                this.INSTANCE_ROWS
-            );
-
-            /*this.imageCanvas.style.position = 'absolute';
-            this.imageCanvas.style.top = '0';
-            document.body.appendChild(this.imageCanvas);*/
-
             this.init();
         });
     }
@@ -96,35 +103,33 @@ export class Particles3Sketch {
             0.1,
             100
         );
-        this.camera.position.z = 1.1;
+        this.camera.position.z = 2;
         this.scene = new Scene();
         this.renderer = new WebGLRenderer({
             antialias: false
         });
         this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.raycaster = new Raycaster();
 
+        this.initImageCanvas();
+        this.initPointerPlane();
         this.initInstances();
 
         this.container.appendChild(this.renderer.domElement);
 
         this.updateSize();
 
-        this.controls = new OrbitControls(
+        /*this.controls = new OrbitControls(
             this.camera,
             this.renderer.domElement
         );
-        this.controls.update();
+        this.controls.update();*/
 
         this.renderer.domElement.onpointermove = (e) => {
-            if (!this.mousePos) this.mousePos = new Vector2();
-
-            this.mousePos.x = e.clientX / this.renderer.domElement.offsetWidth;
-            this.mousePos.y =
-                1 - e.clientY / this.renderer.domElement.offsetHeight;
-
-            if (!this.prevMousePos) {
-                this.prevMousePos = this.mousePos.clone();
-            }
+            this.pointerPosition.x =
+                (e.clientX / this.renderer.domElement.offsetWidth) * 2 - 1;
+            this.pointerPosition.y =
+                -(e.clientY / this.renderer.domElement.offsetHeight) * 2 + 1;
         };
 
         if (this.oninit) this.oninit();
@@ -137,10 +142,59 @@ export class Particles3Sketch {
         document.body.appendChild(gui.domElement);
     }
 
+    private initImageCanvas(): void {
+        this.imageCanvas = document.createElement('canvas');
+        const ctx = this.imageCanvas.getContext('2d');
+
+        const container: Vector2 = new Vector2(
+            this.instanceColumns,
+            this.instanceRows
+        );
+        const item: Vector2 = new Vector2(
+            this.imageTexture.image.width,
+            this.imageTexture.image.height
+        );
+        const aspect: Vector2 = this.getCoverAspectRatio(item, container);
+        const sw = aspect.x * item.x;
+        const sh = aspect.y * item.y;
+        const sx = (item.x - sw) / 2;
+        const sy = (item.y - sh) / 2;
+
+        ctx.drawImage(
+            this.imageTexture.image,
+            sx,
+            sy,
+            sw,
+            sh,
+            0,
+            0,
+            this.instanceColumns,
+            this.instanceRows
+        );
+
+        this.imageCanvas.style.position = 'absolute';
+        this.imageCanvas.style.top = '0';
+        document.body.appendChild(this.imageCanvas);
+    }
+
+    private initPointerPlane(): void {
+        const geometry = new PlaneBufferGeometry(
+            this.cellSize * this.instanceColumns,
+            this.cellSize * this.instanceRows
+        );
+        this.raycasterPlaneMesh = new Mesh(
+            geometry,
+            new MeshBasicMaterial({ color: 0x333333 })
+        );
+        this.raycasterPlaneMesh.visible = false;
+        this.raycasterPlaneMesh.position.z = 0.1;
+        this.scene.add(this.raycasterPlaneMesh);
+    }
+
     private initInstances(): void {
         const geometry = new PlaneBufferGeometry(
-            this.CELL_SIZE * 0.95,
-            this.CELL_SIZE * 0.95
+            this.cellSize * 0.95,
+            this.cellSize * 0.95
         );
         this.instanceMaterial = new ShaderMaterial({
             uniforms: {
@@ -156,7 +210,7 @@ export class Particles3Sketch {
             blending: AdditiveBlending
         });
 
-        const totalInstanceCount = this.INSTANCE_COLUMNS * this.INSTANCE_ROWS;
+        const totalInstanceCount = this.instanceColumns * this.instanceRows;
 
         this.instanceMesh = new InstancedMesh(
             geometry,
@@ -168,15 +222,15 @@ export class Particles3Sketch {
             totalInstanceCount * 2
         );
         let count = 0;
-        for (let x = 0; x < this.INSTANCE_COLUMNS; x++) {
-            for (let y = 0; y < this.INSTANCE_ROWS; y++) {
+        for (let x = 0; x < this.instanceColumns; x++) {
+            for (let y = 0; y < this.instanceRows; y++) {
                 this.instanceDummy.position.set(
-                    x * this.CELL_SIZE,
-                    y * this.CELL_SIZE,
+                    x * this.cellSize,
+                    y * this.cellSize,
                     0
                 );
                 instanceIndex.set(
-                    [x / this.INSTANCE_COLUMNS, y / this.INSTANCE_ROWS],
+                    [x / this.instanceColumns, y / this.instanceRows],
                     count * 2
                 );
 
@@ -196,17 +250,17 @@ export class Particles3Sketch {
         const imageData: ImageData = ctx.getImageData(
             0,
             0,
-            this.INSTANCE_COLUMNS,
-            this.INSTANCE_ROWS
+            this.instanceColumns,
+            this.instanceRows
         );
         const imageDataArray: Float32Array = new Float32Array(
-            this.INSTANCE_ROWS * this.INSTANCE_COLUMNS * 4
+            this.instanceRows * this.instanceColumns * 4
         );
         let index = 0;
-        for (let j = 0; j < this.INSTANCE_COLUMNS; j++) {
-            for (let k = 0; k < this.INSTANCE_ROWS; k++) {
+        for (let j = 0; j < this.instanceColumns; j++) {
+            for (let k = 0; k < this.instanceRows; k++) {
                 let srcIndex =
-                    j + (this.INSTANCE_ROWS - k - 1) * this.INSTANCE_COLUMNS;
+                    j + (this.instanceRows - k - 1) * this.instanceColumns;
                 imageDataArray.set(
                     [
                         imageData.data[srcIndex * 4] / 255,
@@ -227,8 +281,8 @@ export class Particles3Sketch {
         );
 
         this.instanceMesh.position.set(
-            -(this.INSTANCE_COLUMNS / 2) * this.CELL_SIZE,
-            -(this.INSTANCE_ROWS / 2) * this.CELL_SIZE,
+            -(this.instanceColumns / 2) * this.cellSize,
+            -(this.instanceRows / 2) * this.cellSize,
             0
         );
 
@@ -244,31 +298,40 @@ export class Particles3Sketch {
         this.instanceMaterial.uniforms.u_resolution.value.y = this.renderer.domElement.height;
         this.camera.aspect =
             this.container.offsetWidth / this.container.offsetHeight;
+        this.focusObjectCover(this.raycasterPlaneMesh);
         this.camera.updateProjectionMatrix();
     }
 
     public animate(): void {
         if (this.isDestroyed) return;
 
+        this.updatePointer();
+
         // animate the noise strength
         this.noiseStrength +=
             (this.targetNoiseStrength - this.noiseStrength) / 8;
         this.instanceMaterial.uniforms.u_noiseStrength.value = this.noiseStrength;
 
-        // animate the mesh rotation
-        if (this.mousePos) {
-            this.scene.rotation.y +=
-                (this.mousePos.x / 15 - this.scene.rotation.y) / 10;
-            this.scene.rotation.x +=
-                (-this.mousePos.y / 15 - this.scene.rotation.x) / 10;
-        }
-
         this.animateInstances();
 
-        this.controls.update();
+        //this.controls.update();
         this.render();
 
         requestAnimationFrame(() => this.animate());
+    }
+
+    private updatePointer(): void {
+        this.raycaster.setFromCamera(this.pointerPosition, this.camera);
+        const intersects = this.raycaster.intersectObjects([this.instanceMesh]);
+        if (intersects.length > 0) {
+            this.planePosition = intersects[0].point;
+            this.planePosition.x = this.planePosition.x + 0.5;
+            this.planePosition.y = this.planePosition.y + 0.5;
+
+            if (!this.prevPlanePosition) {
+                this.prevPlanePosition = this.planePosition.clone();
+            }
+        }
     }
 
     private animateInstances(): void {
@@ -281,17 +344,17 @@ export class Particles3Sketch {
     }
 
     private animatePointerTrail(): void {
-        if (this.mousePos) {
+        if (this.planePosition && this.prevPlanePosition) {
             const radius = 10;
-            let dmX = this.mousePos.x - this.prevMousePos.x;
-            let dmY = this.mousePos.y - this.prevMousePos.y;
+            let dmX = this.planePosition.x - this.prevPlanePosition.x;
+            let dmY = this.planePosition.y - this.prevPlanePosition.y;
             dmX = Math.max(-1, Math.min(1, dmX));
             dmY = Math.max(-1, Math.min(1, dmY));
 
-            let mX = this.mousePos.x;
-            let mY = this.mousePos.y;
-            mX = Math.floor(mX * this.INSTANCE_COLUMNS);
-            mY = Math.floor(mY * this.INSTANCE_ROWS);
+            let mX = this.planePosition.x;
+            let mY = this.planePosition.y;
+            mX = Math.floor(mX * this.instanceColumns);
+            mY = Math.floor(mY * this.instanceRows);
 
             const aspect =
                 this.renderer.domElement.offsetWidth /
@@ -303,12 +366,12 @@ export class Particles3Sketch {
             for (let i = 0; i < this.instanceValue.length; ++i) {
                 let v = this.instanceValue[i];
 
-                v *= 0.96;
+                v *= 0.98;
 
-                const px = Math.floor(i / this.INSTANCE_ROWS);
-                const py = i - px * this.INSTANCE_ROWS;
-                const dx = (mX - px) * aspectX;
-                const dy = (mY - py) / aspectY;
+                const px = Math.floor(i / this.instanceRows);
+                const py = i - px * this.instanceRows;
+                const dx = mX - px; // * aspectX;
+                const dy = mY - py; // / aspectY;
                 const d = Math.sqrt(dx * dx + dy * dy);
                 const f = 1 - d / radius;
 
@@ -319,7 +382,7 @@ export class Particles3Sketch {
                 this.instanceValue[i] = Math.min(v, 0.99);
             }
 
-            this.prevMousePos.copy(this.mousePos);
+            this.prevPlanePosition.copy(this.planePosition);
         }
     }
 
@@ -334,5 +397,54 @@ export class Particles3Sketch {
 
     public set focus(value: boolean) {
         this.targetNoiseStrength = value ? 0.18 : 1;
+    }
+
+    private getCoverAspectRatio(item: Vector2, container: Vector2): Vector2 {
+        const itemAspect: number = item.x / item.y;
+        const containerAspect: number = container.x / container.y;
+
+        if (itemAspect > containerAspect) {
+            return new Vector2(containerAspect / itemAspect, 1);
+        } else {
+            return new Vector2(1, itemAspect / containerAspect);
+        }
+    }
+
+    private focusObjectCover(obj: Object3D): void {
+        const bbox: Box3 = new Box3().setFromObject(obj);
+        const objSize: Vector3 = bbox.getSize(new Vector3());
+        const objAspect = objSize.x / objSize.y;
+
+        // the horizontal field of view
+        const vFOV = this.camera.fov / (180 / Math.PI);
+        const hFOV = 2 * Math.atan(Math.tan(vFOV / 2) * this.camera.aspect);
+
+        // take the z position of the obj into account
+        let cameraZ = this.camera.position.z - obj.position.z;
+
+        // get the viewport size at z = obj.z
+        const viewportSize: Vector3 = new Vector3(
+            2 * Math.tan(hFOV / 2) * cameraZ,
+            2 * Math.tan(vFOV / 2) * cameraZ,
+            0
+        );
+        // fit the object horizontally
+        cameraZ = objSize.x / 2 / Math.tan(hFOV / 2) + obj.position.z;
+        this.camera.position.z = cameraZ;
+
+        // update the viewport size
+        viewportSize.set(
+            2 * Math.tan(hFOV / 2) * cameraZ,
+            2 * Math.tan(vFOV / 2) * cameraZ,
+            0
+        );
+
+        // fit the object vertically
+        if (viewportSize.y > objSize.y) {
+            this.camera.fov =
+                2 * (180 / Math.PI) * Math.atan(objSize.y / (2 * cameraZ));
+        }
+
+        this.camera.updateProjectionMatrix();
     }
 }

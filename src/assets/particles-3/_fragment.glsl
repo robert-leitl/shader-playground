@@ -22,11 +22,12 @@ void main() {
     float imageValue = (v_imageColor.r + v_imageColor.g + v_imageColor.b) / 3.;
 
     // for bright images, subtract the instanceValue (-> dark mouse follower)
-    float value = max(0., imageValue - v_instanceValue);
+    //float value = max(0., imageValue - v_instanceValue);
+    float value = max(v_instanceValue * 0.9, imageValue);
 
     // get the color from the instance index
     vec2 index = v_index * 2. - 1.;
-    vec3 color = colorAccent * (smoothstep(0.8, 0.3, length(index)) + (1. - u_noiseStrength));
+    vec3 color = colorAccent * (smoothstep(.9, 0.3, length(index)) * 0.9 + (1. - u_noiseStrength));
 
     // map the uv to the char corresponding to the brightness value
     uv.x = uv.x / CHAR_COUNT + floor(value * CHAR_COUNT) * 1. / CHAR_COUNT;
@@ -37,11 +38,11 @@ void main() {
     charsMap.a *= 0.7 + value * 0.7;
 
     // draw the background rectangle
-    vec4 bgColor = vec4(color, value * 0.6);
+    vec4 bgColor = vec4(color, value * 0.8);
     bgColor.rgb *= color;
 
     gl_FragColor = charsMap + bgColor;
 
     // overall opacity factor
-    gl_FragColor.a *= 0.4 + (1. - u_noiseStrength) * 0.9;
+    gl_FragColor.a *= 0.5 + (1. - u_noiseStrength) * 1. + v_instanceValue * 2.;
 }

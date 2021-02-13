@@ -38,11 +38,12 @@ import { Particles3Sketch } from './particles-3-sketch';
                 transform: translate(-50%, -50%);
                 background: #eeeeee;
                 border: none;
-                font-size: 2em;
-                font-weight: bold;
+                font-size: 1.5em;
+                font-weight: normal;
+                color: #444;
                 border-radius: 2em;
                 outline: none;
-                padding: 0.5em;
+                padding: 0.5em 1em;
                 cursor: pointer;
                 box-shadow: rgba(255, 255, 255, 0.5) 0px 0px 20px;
             }
