@@ -63,7 +63,7 @@ export class Particles3Sketch {
         this.container = container;
 
         const aspect = this.container.offsetWidth / this.container.offsetHeight;
-        const maxCells = 100;
+        const maxCells = 140;
         if (aspect > 1) {
             this.instanceRows = Math.floor(maxCells / aspect);
             this.instanceColumns = maxCells;
@@ -75,12 +75,16 @@ export class Particles3Sketch {
         this.instanceValue = new Float32Array(
             this.instanceRows * this.instanceColumns
         );
-        console.log(this.instanceColumns, this.instanceRows);
+
+        let imagePath = 'assets/particles-3/hand_portrait.jpg';
+        if (aspect > 1) {
+            imagePath = 'assets/particles-3/hand_landscape.jpg';
+        }
 
         const assets: Promise<any>[] = [
             new FileLoader().loadAsync('assets/particles-3/_fragment.glsl'),
             new FileLoader().loadAsync('assets/particles-3/_vertex.glsl'),
-            new TextureLoader().loadAsync('assets/particles-3/hand1.jpg'),
+            new TextureLoader().loadAsync(imagePath),
             new TextureLoader().loadAsync('assets/particles-3/chars.png')
         ];
 
@@ -172,9 +176,9 @@ export class Particles3Sketch {
             this.instanceRows
         );
 
-        this.imageCanvas.style.position = 'absolute';
+        /*this.imageCanvas.style.position = 'absolute';
         this.imageCanvas.style.top = '0';
-        document.body.appendChild(this.imageCanvas);
+        document.body.appendChild(this.imageCanvas);*/
     }
 
     private initPointerPlane(): void {

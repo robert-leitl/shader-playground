@@ -102,6 +102,7 @@ void main() {
     vec3 pos = position;
     float dist = length(v_index * 2. - 1.);
     pos.z += noise * (u_noiseStrength - .1) * 0.45 + (1. - u_noiseStrength) * dist * 0.2;
+    pos.z -= v_instanceValue * 0.1;
 
     gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
 }
