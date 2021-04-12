@@ -34,7 +34,7 @@ export class Particles2Sketch {
     private renderer: WebGLRenderer;
     private controls: OrbitControls;
 
-    private PARTICLES_PER_LINE = 300;
+    private PARTICLES_PER_LINE = 500;
 
     private particleMaterial: ShaderMaterial;
     private particleVertexShader: string;

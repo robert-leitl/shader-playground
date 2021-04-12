@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { Displace1Component } from './displace-1/displace-1.component';
 import { Displace2Component } from './displace-2/displace-2.component';
+import { Gradient1Component } from './gradient-1/gradient-1.component';
 import { ImageTransition1Component } from './image-transition-1/image-transition-1.component';
 import { InstancedMesh1Component } from './instanced-mesh-1/instanced-mesh-1.component';
 import { MouseDistortion1Component } from './mouse-distortion-1/mouse-distortion-1.component';
@@ -16,7 +17,7 @@ export const routes: Routes = [
     {
         path: '',
         pathMatch: 'full',
-        redirectTo: '10'
+        redirectTo: '11'
     },
     {
         path: 'test',
@@ -90,6 +91,13 @@ export const routes: Routes = [
         component: Particles3Component,
         data: {
             label: '10'
+        }
+    },
+    {
+        path: '11',
+        component: Gradient1Component,
+        data: {
+            label: '11'
         }
     }
 ];

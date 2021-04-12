@@ -380,7 +380,7 @@ export class Particles3Sketch {
                 const f = 1 - d / radius;
 
                 if (d < radius && Math.abs(dmX) > 0 && Math.abs(dmY) > 0) {
-                    v += f * 0.1;
+                    v += f / 10;
                 }
 
                 this.instanceValue[i] = Math.min(v, 0.99);
