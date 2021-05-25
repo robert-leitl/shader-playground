@@ -320,7 +320,7 @@ void main() {
 
 
     float tilt = u_resolution.y / 2.0 * uvNorm.y;
-    float incline = u_resolution.x * uvNorm.x / 2.0 * 0.0005;
+    float incline = u_resolution.x * uvNorm.x / 2.0 * -0.00005;
     float offset = u_resolution.x / 2.0 * 0.2 * mix(0.0005, -0.006, uvNorm.y);
 
     float noise = snoise(vec3(

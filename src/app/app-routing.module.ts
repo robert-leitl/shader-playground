@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+import { DirtyStrokesComponent } from './dirty-strokes/dirty-strokes.component';
 import { Displace1Component } from './displace-1/displace-1.component';
 import { Displace2Component } from './displace-2/displace-2.component';
 import { Gradient1Component } from './gradient-1/gradient-1.component';
@@ -17,7 +18,7 @@ export const routes: Routes = [
     {
         path: '',
         pathMatch: 'full',
-        redirectTo: '11'
+        redirectTo: '12'
     },
     {
         path: 'test',
@@ -98,6 +99,13 @@ export const routes: Routes = [
         component: Gradient1Component,
         data: {
             label: '11'
+        }
+    },
+    {
+        path: '12',
+        component: DirtyStrokesComponent,
+        data: {
+            label: '12'
         }
     }
 ];

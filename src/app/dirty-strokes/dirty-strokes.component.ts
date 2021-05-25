@@ -10,50 +10,26 @@ import {
 } from '@angular/core';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
-import { Particles3Sketch } from './particles-3-sketch';
+import { DirtyStrokesSketch } from './dirty-strokes-sketch';
 
 @Component({
-    selector: 'app-particles-3',
-    template: `
-        <button
-            (pointerenter)="onCtaPointerEnter()"
-            (pointerleave)="onCtaPointerLeave()"
-        >
-            CTA
-        </button>
-    `,
+    selector: 'app-dirty-strokes',
+    template: ``,
     styles: [
         `
-            app-particles-3 {
+            app-dirty-strokes {
                 display: block;
                 width: 100%;
                 height: 100%;
                 overflow: hidden;
-            }
-
-            button {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: #eeeeee;
-                border: none;
-                font-size: 1.5em;
-                font-weight: normal;
-                color: #444;
-                border-radius: 2em;
-                outline: none;
-                padding: 0.5em 1em;
-                cursor: pointer;
-                box-shadow: rgba(255, 255, 255, 0.5) 0px 0px 20px;
             }
         `
     ],
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class Particles3Component implements OnInit, AfterViewInit, OnDestroy {
-    private sketch: Particles3Sketch;
+export class DirtyStrokesComponent implements OnInit, AfterViewInit, OnDestroy {
+    private sketch: DirtyStrokesSketch;
 
     private _destroyed$: Subject<boolean> = new Subject<boolean>();
 
@@ -62,7 +38,7 @@ export class Particles3Component implements OnInit, AfterViewInit, OnDestroy {
     ngOnInit(): void {}
 
     ngAfterViewInit(): void {
-        this.sketch = new Particles3Sketch(this.hostElementRef.nativeElement);
+        this.sketch = new DirtyStrokesSketch(this.hostElementRef.nativeElement);
         this.sketch.oninit = () => {
             this.ngZone.runOutsideAngular(() => this.sketch.animate());
 
@@ -76,13 +52,5 @@ export class Particles3Component implements OnInit, AfterViewInit, OnDestroy {
         this.sketch.destroy();
         this._destroyed$.next(true);
         this._destroyed$.complete();
-    }
-
-    onCtaPointerEnter(): void {
-        this.sketch.focus = true;
-    }
-
-    onCtaPointerLeave(): void {
-        this.sketch.focus = false;
     }
 }

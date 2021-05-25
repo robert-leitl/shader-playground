@@ -10,7 +10,7 @@ void main() {
     vec2 uv = v_uv * 2. - 1.;
 
     // darken edges
-    color += pow(length(uv * vec2(.5, 5.)), 3.) * 0.1;
+    color += pow(length(uv * vec2(.5, 7.)), 3.) * 0.02;
 
     gl_FragColor = vec4(color, 1);
 }

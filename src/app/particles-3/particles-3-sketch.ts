@@ -63,7 +63,11 @@ export class Particles3Sketch {
         this.container = container;
 
         const aspect = this.container.offsetWidth / this.container.offsetHeight;
-        const maxCells = 140;
+        const maxSize = Math.max(
+            this.container.offsetWidth,
+            this.container.offsetHeight
+        );
+        const maxCells = maxSize > 1080 ? 120 : 70;
         if (aspect > 1) {
             this.instanceRows = Math.floor(maxCells / aspect);
             this.instanceColumns = maxCells;
@@ -370,7 +374,7 @@ export class Particles3Sketch {
             for (let i = 0; i < this.instanceValue.length; ++i) {
                 let v = this.instanceValue[i];
 
-                v *= 0.98;
+                v *= 0.985;
 
                 const px = Math.floor(i / this.instanceRows);
                 const py = i - px * this.instanceRows;

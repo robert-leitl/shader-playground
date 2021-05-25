@@ -101,8 +101,9 @@ void main() {
     // z-offset by the value (mouse follower) and noise
     vec3 pos = position;
     float dist = length(v_index * 2. - 1.);
-    pos.z += noise * (u_noiseStrength - .1) * 0.45 + (1. - u_noiseStrength) * dist * 0.2;
-    pos.z -= v_instanceValue * 0.05;
+    pos.z -= 0.1;
+    pos.z += noise * (u_noiseStrength - .1) * .55 + (1. - u_noiseStrength) * dist * 0.2;
+    //pos.z -= v_instanceValue * 0.05;
 
     gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(pos, 1.0);
 }

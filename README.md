@@ -38,3 +38,7 @@ Raymarching exercise from: https://www.youtube.com/watch?v=afc8qabsGYg&list=PLsw
 ### 9
 
 Travelling particles from: https://www.youtube.com/watch?v=MnKKetZZi8g
+
+### 12 
+
+Dirty Strokes from: https://www.youtube.com/watch?v=_qJdpSr3HkM

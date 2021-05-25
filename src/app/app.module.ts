@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { DirtyStrokesComponent } from './dirty-strokes/dirty-strokes.component';
 import { Displace1Component } from './displace-1/displace-1.component';
 import { Displace2Component } from './displace-2/displace-2.component';
 import { Gradient1Component } from './gradient-1/gradient-1.component';
@@ -30,7 +31,8 @@ import { TestComponent } from './test/test.component';
         Particles2Component,
         MouseDistortion2Component,
         Particles3Component,
-        Gradient1Component
+        Gradient1Component,
+        DirtyStrokesComponent
     ],
     imports: [BrowserModule, AppRoutingModule],
     providers: [],

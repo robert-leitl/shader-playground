@@ -64,23 +64,23 @@ export class Gradient1Sketch {
 
     private init(): void {
         this.camera = new OrthographicCamera(-1, 1, -1, 1);
-        this.camera.position.z = -2;
+        this.camera.position.z = 2;
         this.scene = new Scene();
 
         this.initGradientNoiseBackground();
 
-        this.renderer = new WebGLRenderer();
+        this.renderer = new WebGLRenderer({ antialias: false });
         this.renderer.setPixelRatio(window.devicePixelRatio);
 
         this.container.appendChild(this.renderer.domElement);
 
         this.updateSize();
 
-        this.controls = new OrbitControls(
+        /*this.controls = new OrbitControls(
             this.camera,
             this.renderer.domElement
         );
-        this.controls.update();
+        this.controls.update();*/
 
         document.onpointermove = (e) => {
             this.gradientMaterial.uniforms.u_mouse.value.x = e.pageX;
@@ -194,7 +194,7 @@ export class Gradient1Sketch {
     public animate(): void {
         if (this.isDestroyed) return;
 
-        this.controls.update();
+        //this.controls.update();
         this.render();
 
         requestAnimationFrame(() => this.animate());
