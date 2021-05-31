@@ -1,9 +1,11 @@
 import {
     CatmullRomCurve3,
+    DoubleSide,
     FileLoader,
     IcosahedronBufferGeometry,
     Mesh,
     MeshBasicMaterial,
+    Object3D,
     PerspectiveCamera,
     PlaneBufferGeometry,
     Raycaster,
@@ -26,13 +28,16 @@ export class EvilSpaghettiSketch {
     private container: HTMLElement;
     private camera: PerspectiveCamera;
     private scene: Scene;
+    private bgScene: Scene;
     private renderer: WebGLRenderer;
-    private controls: OrbitControls;
+    //private controls: OrbitControls;
     private raycaster: Raycaster = new Raycaster();
 
+    private tubeContainer: Object3D;
     private tubeShaderMaterial: ShaderMaterial;
     private tubeVertexShader: string;
     private tubeFragmentShader: string;
+    private rotationOffset = 0;
 
     private bgShaderMaterial: ShaderMaterial;
     private bgVertexShader: string;
@@ -41,6 +46,7 @@ export class EvilSpaghettiSketch {
 
     private lightSphere: Mesh;
     private mousePos: Vector2 = new Vector2();
+    private mouseFollowerPos: Vector2 = new Vector2();
     private mouseScenePos: Vector3 = new Vector3();
     private mouseVelocity: Vector3 = new Vector3();
     private mousePosElastic: Vector3 = new Vector3();
@@ -82,25 +88,27 @@ export class EvilSpaghettiSketch {
             0.1,
             100
         );
-        this.camera.position.z = 2;
+        this.camera.position.z = 1.8;
         this.scene = new Scene();
+        this.bgScene = new Scene();
 
         this.initBg();
         this.initTubes();
         this.initLightSphere();
 
         this.renderer = new WebGLRenderer();
+        this.renderer.autoClear = false;
         this.renderer.setPixelRatio(window.devicePixelRatio);
 
         this.container.appendChild(this.renderer.domElement);
 
         this.updateSize();
 
-        this.controls = new OrbitControls(
+        /*this.controls = new OrbitControls(
             this.camera,
             this.renderer.domElement
         );
-        this.controls.update();
+        this.controls.update();*/
 
         document.onpointermove = (e) => {
             this.mousePos.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -116,6 +124,9 @@ export class EvilSpaghettiSketch {
     }
 
     initTubes(): void {
+        this.tubeContainer = new Object3D();
+        this.scene.add(this.tubeContainer);
+
         this.tubeShaderMaterial = new ShaderMaterial({
             uniforms: {
                 u_time: { type: '', value: 1.0 } as any,
@@ -124,7 +135,8 @@ export class EvilSpaghettiSketch {
                 u_lightPos: { type: 'v3', value: new Vector3() } as any
             },
             vertexShader: this.tubeVertexShader,
-            fragmentShader: this.tubeFragmentShader
+            fragmentShader: this.tubeFragmentShader,
+            side: DoubleSide
         });
 
         for (let i = 0; i < 200; ++i) {
@@ -165,12 +177,12 @@ export class EvilSpaghettiSketch {
         const geometry = new TubeBufferGeometry(
             curve,
             numPoints,
-            0.003,
-            3,
+            0.005,
+            5,
             false
         );
         const mesh = new Mesh(geometry, this.tubeShaderMaterial);
-        this.scene.add(mesh);
+        this.tubeContainer.add(mesh);
     }
 
     initBg(): void {
@@ -188,7 +200,7 @@ export class EvilSpaghettiSketch {
         });
 
         this.bgPlane = new Mesh(geometry, this.bgShaderMaterial);
-        this.scene.add(this.bgPlane);
+        this.bgScene.add(this.bgPlane);
     }
 
     initLightSphere(): void {
@@ -217,6 +229,15 @@ export class EvilSpaghettiSketch {
     public animate(): void {
         if (this.isDestroyed) return;
 
+        this.mouseFollowerPos.add(
+            this.mousePos.clone().sub(this.mouseFollowerPos).multiplyScalar(0.1)
+        );
+
+        this.rotationOffset += 0.0005;
+        this.tubeContainer.rotation.y =
+            this.mouseFollowerPos.x / 10 + this.rotationOffset;
+        this.tubeContainer.rotation.x = -this.mouseFollowerPos.y / 10;
+
         this.raycaster.setFromCamera(this.mousePos, this.camera);
         // calculate objects intersecting the picking ray
         const intersects = this.raycaster.intersectObject(this.bgPlane);
@@ -225,7 +246,7 @@ export class EvilSpaghettiSketch {
         }
 
         this.animateLightSphere();
-        this.controls.update();
+        //this.controls.update();
         this.render();
 
         requestAnimationFrame(() => this.animate());
@@ -256,6 +277,9 @@ export class EvilSpaghettiSketch {
             this.mousePosElastic
         );
 
+        this.renderer.clear();
+        this.renderer.render(this.bgScene, this.camera);
+        this.renderer.clearDepth();
         this.renderer.render(this.scene, this.camera);
     }
 

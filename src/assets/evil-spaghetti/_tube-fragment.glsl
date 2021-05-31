@@ -15,7 +15,7 @@ float getScatter(vec3 cameraPos, vec3 dir, vec3 lightPos, float d) {
     float s = 1. / sqrt(max(0.0001, t));
     float l = s * (atan( (d + b) * s) - atan( b * s));
 
-    return pow(max(0., l / 55.), 0.4);
+    return pow(max(0., l / 120.), 0.4);
 }
 
 void main() {

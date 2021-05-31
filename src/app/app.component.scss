@@ -15,12 +15,13 @@ nav {
   ul {
     list-style: none;
     margin: 0;
-    padding: 2em 0 0 2em;
+    padding: 1em 0 0 2em;
     display: flex;
     flex-wrap: wrap;
 
     li {
       min-width: 3em;
+      margin-top: 1em;
     }
 
     a {
