@@ -3,7 +3,7 @@ varying vec3 v_normal;
 
 uniform vec2 u_resolution;
 uniform float u_time;
-uniform sampler2D u_t1;
+uniform sampler2D u_noiseTexture;
 
 //	Simplex 3D Noise
 //	by Ian McEwan, Ashima Arts
@@ -84,18 +84,28 @@ float snoise(vec3 v){
 void main() {
     vec2 st = gl_FragCoord.xy / u_resolution.xy;
 
+    float progress = (sin(u_time * 0.2) *.5 + .1) * 1.8;
+    float distance = length(st * 2. - 1.);
+    float ttt = texture2D(u_noiseTexture, st).r;
+    float maskValue = ttt * 0.65 + progress;
+    float mask = smoothstep(maskValue - 0.01, maskValue, distance);
+
     float light = dot(v_normal, normalize(vec3(1.)));
 
     // strokes
-    float stroke = cos((st.x - st.y) * 1000.) * .5 + .5;
-    float smallnoise = snoise(vec3(st * 500., 0.));
+    float stroke = cos((st.x - st.y) * 800.) * .5 + .5;
+    float smallnoise = snoise(vec3(st * 300., 0.));
     float bignoise = snoise(vec3(st * 3., 0.));
     stroke += smallnoise + bignoise * .6;
 
     // combined
     float combined = light * 1.5 + stroke;
 
+    // animated
+    vec3 color = mix(vec3(v_normal.gb, 1.) + combined * 0.2, vec3(combined), mask);
+
     gl_FragColor = vec4(vec3(light),1.0);
     gl_FragColor = vec4(vec3(stroke),1.0);
     gl_FragColor = vec4(vec3(combined),1.0);
+    gl_FragColor = vec4(color, 1.0);
 }

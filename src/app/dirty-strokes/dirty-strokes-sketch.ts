@@ -23,6 +23,7 @@ export class DirtyStrokesSketch {
     private scene: Scene;
     private renderer: WebGLRenderer;
     private controls: OrbitControls;
+    private noiseTexture: Texture;
 
     private vertexShader: string;
     private fragmentShader: string;
@@ -36,12 +37,14 @@ export class DirtyStrokesSketch {
 
         const assets: Promise<any>[] = [
             new FileLoader().loadAsync('assets/dirty-strokes/_fragment.glsl'),
-            new FileLoader().loadAsync('assets/dirty-strokes/_vertex.glsl')
+            new FileLoader().loadAsync('assets/dirty-strokes/_vertex.glsl'),
+            new TextureLoader().loadAsync('assets/dirty-strokes/noise.jpeg')
         ];
 
         Promise.all(assets).then((res) => {
             this.fragmentShader = res[0];
             this.vertexShader = res[1];
+            this.noiseTexture = res[2];
 
             this.init();
         });
@@ -54,7 +57,7 @@ export class DirtyStrokesSketch {
             0.1,
             100
         );
-        this.camera.position.z = 7;
+        this.camera.position.z = 3;
         this.scene = new Scene();
         this.scene.background = new Color(240, 240, 240);
         this.renderer = new WebGLRenderer();
@@ -85,7 +88,8 @@ export class DirtyStrokesSketch {
             uniforms: {
                 u_time: { type: '', value: 1.0 } as any,
                 u_resolution: { type: 'v2', value: new Vector2() } as any,
-                u_mouse: { type: 'v2', value: new Vector2() } as any
+                u_mouse: { type: 'v2', value: new Vector2() } as any,
+                u_noiseTexture: { type: 't', value: this.noiseTexture } as any
             },
             vertexShader: this.vertexShader,
             fragmentShader: this.fragmentShader

@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { DirtyStrokesComponent } from './dirty-strokes/dirty-strokes.component';
 import { Displace1Component } from './displace-1/displace-1.component';
 import { Displace2Component } from './displace-2/displace-2.component';
+import { EvilSpaghettiComponent } from './evil-spaghetti/evil-spaghetti.component';
 import { Gradient1Component } from './gradient-1/gradient-1.component';
 import { ImageTransition1Component } from './image-transition-1/image-transition-1.component';
 import { InstancedMesh1Component } from './instanced-mesh-1/instanced-mesh-1.component';
@@ -32,7 +33,8 @@ import { TestComponent } from './test/test.component';
         MouseDistortion2Component,
         Particles3Component,
         Gradient1Component,
-        DirtyStrokesComponent
+        DirtyStrokesComponent,
+        EvilSpaghettiComponent
     ],
     imports: [BrowserModule, AppRoutingModule],
     providers: [],
