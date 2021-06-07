@@ -46,3 +46,8 @@ Dirty Strokes from: https://www.youtube.com/watch?v=_qJdpSr3HkM
 ### 13
 
 Curl Noise from: https://www.youtube.com/watch?v=8PG4RrNwby0
+
+
+### 14
+
+Ripple image/video transition effect from: https://www.youtube.com/watch?v=EnVkYHzJ6Ik

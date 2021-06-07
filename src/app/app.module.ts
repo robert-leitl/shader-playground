@@ -16,6 +16,7 @@ import { Particles1Component } from './particles-1/particles-1.component';
 import { Particles2Component } from './particles-2/particles-2.component';
 import { Particles3Component } from './particles-3/particles-3.component';
 import { RayMarching1Component } from './ray-marching-1/ray-marching-1.component';
+import { RippleTransitionComponent } from './ripple-transition/ripple-transition.component';
 import { TestComponent } from './test/test.component';
 
 @NgModule({
@@ -34,7 +35,8 @@ import { TestComponent } from './test/test.component';
         Particles3Component,
         Gradient1Component,
         DirtyStrokesComponent,
-        EvilSpaghettiComponent
+        EvilSpaghettiComponent,
+        RippleTransitionComponent
     ],
     imports: [BrowserModule, AppRoutingModule],
     providers: [],

@@ -13,20 +13,23 @@ import { Particles1Component } from './particles-1/particles-1.component';
 import { Particles2Component } from './particles-2/particles-2.component';
 import { Particles3Component } from './particles-3/particles-3.component';
 import { RayMarching1Component } from './ray-marching-1/ray-marching-1.component';
+import { RippleTransitionComponent } from './ripple-transition/ripple-transition.component';
 import { TestComponent } from './test/test.component';
 
 export const routes: Routes = [
     {
         path: '',
         pathMatch: 'full',
-        redirectTo: '13'
+        redirectTo: '14'
     },
     {
         path: 'test',
+        pathMatch: 'full',
         component: TestComponent
     },
     {
         path: '1',
+        pathMatch: 'full',
         component: ImageTransition1Component,
         data: {
             label: '1'
@@ -34,6 +37,7 @@ export const routes: Routes = [
     },
     {
         path: '2',
+        pathMatch: 'full',
         component: MouseDistortion1Component,
         data: {
             label: '2'
@@ -41,6 +45,7 @@ export const routes: Routes = [
     },
     {
         path: '3',
+        pathMatch: 'full',
         component: Displace1Component,
         data: {
             label: '3'
@@ -48,6 +53,7 @@ export const routes: Routes = [
     },
     {
         path: '4',
+        pathMatch: 'full',
         component: Displace2Component,
         data: {
             label: '4'
@@ -55,6 +61,7 @@ export const routes: Routes = [
     },
     {
         path: '5',
+        pathMatch: 'full',
         component: MouseDistortion2Component,
         data: {
             label: '5'
@@ -69,6 +76,7 @@ export const routes: Routes = [
     },
     {
         path: '7',
+        pathMatch: 'full',
         component: InstancedMesh1Component,
         data: {
             label: '7'
@@ -83,6 +91,7 @@ export const routes: Routes = [
     },
     {
         path: '9',
+        pathMatch: 'full',
         component: Particles2Component,
         data: {
             label: '9'
@@ -90,6 +99,7 @@ export const routes: Routes = [
     },
     {
         path: '10',
+        pathMatch: 'full',
         component: Particles3Component,
         data: {
             label: '10'
@@ -97,6 +107,7 @@ export const routes: Routes = [
     },
     {
         path: '11',
+        pathMatch: 'full',
         component: Gradient1Component,
         data: {
             label: '11'
@@ -104,6 +115,7 @@ export const routes: Routes = [
     },
     {
         path: '12',
+        pathMatch: 'full',
         component: DirtyStrokesComponent,
         data: {
             label: '12'
@@ -111,9 +123,18 @@ export const routes: Routes = [
     },
     {
         path: '13',
+        pathMatch: 'full',
         component: EvilSpaghettiComponent,
         data: {
             label: '13'
+        }
+    },
+    {
+        path: '14',
+        pathMatch: 'full',
+        component: RippleTransitionComponent,
+        data: {
+            label: '14'
         }
     }
 ];

@@ -7,6 +7,7 @@ varying vec3 v_position;
 varying vec3 v_normal;
 varying vec3 v_worldPosition;
 
+// https://ijdykeman.github.io/graphics/simple_fog_shader
 float getScatter(vec3 cameraPos, vec3 dir, vec3 lightPos, float d) {
     vec3 q = cameraPos - lightPos;
     float b = dot(dir, q);
