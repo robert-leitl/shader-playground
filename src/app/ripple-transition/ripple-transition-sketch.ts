@@ -72,6 +72,7 @@ export class RippleTransitionSketch {
         this.shaderMaterial = new ShaderMaterial({
             uniforms: {
                 u_time: { value: 1.0 },
+                u_progress: { value: 0.5 },
                 u_resolution: { value: new Vector2() },
                 u_mouse: { value: new Vector2() },
                 u_t1: { value: this.t1 },
@@ -95,6 +96,8 @@ export class RippleTransitionSketch {
         document.onpointermove = (e) => {
             this.shaderMaterial.uniforms.u_mouse.value.x = e.pageX;
             this.shaderMaterial.uniforms.u_mouse.value.y = e.pageY;
+            this.shaderMaterial.uniforms.u_progress.value =
+                e.pageX / this.shaderMaterial.uniforms.u_resolution.value.x;
         };
 
         if (this.oninit) this.oninit();
