@@ -29,6 +29,10 @@ export class RippleTransitionSketch {
     private videoTextureAspect: number;
     private t1: Texture;
     private t1Aspect: number;
+    private progressLinear: number = 0;
+    private progress: number = 0;
+    private noiseProgress: number = 0;
+    private isPointerDown: boolean = false;
 
     private isDestroyed: boolean = false;
 
@@ -41,7 +45,7 @@ export class RippleTransitionSketch {
             ),
             new FileLoader().loadAsync('assets/ripple-transition/_vertex.glsl'),
             new TextureLoader().loadAsync('assets/shared-textures/img2.jpg'),
-            this.loadVideo('assets/shared-textures/forest.mp4')
+            this.loadVideo('assets/shared-textures/leaves.mp4')
         ];
 
         Promise.all(assets).then((res) => {
@@ -73,6 +77,7 @@ export class RippleTransitionSketch {
             uniforms: {
                 u_time: { value: 1.0 },
                 u_progress: { value: 0.5 },
+                u_noiseProgress: { value: 0.5 },
                 u_resolution: { value: new Vector2() },
                 u_mouse: { value: new Vector2() },
                 u_t1: { value: this.t1 },
@@ -96,8 +101,13 @@ export class RippleTransitionSketch {
         document.onpointermove = (e) => {
             this.shaderMaterial.uniforms.u_mouse.value.x = e.pageX;
             this.shaderMaterial.uniforms.u_mouse.value.y = e.pageY;
-            this.shaderMaterial.uniforms.u_progress.value =
-                e.pageX / this.shaderMaterial.uniforms.u_resolution.value.x;
+        };
+
+        document.onpointerdown = () => {
+            this.isPointerDown = true;
+        };
+        document.onpointerup = () => {
+            this.isPointerDown = false;
         };
 
         if (this.oninit) this.oninit();
@@ -136,9 +146,28 @@ export class RippleTransitionSketch {
     public animate(): void {
         if (this.isDestroyed) return;
 
+        if (this.isPointerDown) {
+            this.progressLinear += 0.02;
+        } else {
+            this.progressLinear -= 0.07;
+        }
+        this.progressLinear = Math.max(0, Math.min(1, this.progressLinear));
+        this.progress = this.easeInOutQuint(this.progressLinear);
+
+        const damping = this.isPointerDown ? 1 : 10;
+        this.noiseProgress += (this.progress - this.noiseProgress) / damping;
+        this.shaderMaterial.uniforms.u_progress.value = this.progress;
+        this.shaderMaterial.uniforms.u_noiseProgress.value = this.noiseProgress;
+
         this.render();
 
         requestAnimationFrame(() => this.animate());
+    }
+
+    easeInOutQuint(x: number): number {
+        return x < 0.5
+            ? 16 * x * x * x * x * x
+            : 1 - Math.pow(-2 * x + 2, 5) / 2;
     }
 
     public render(): void {
