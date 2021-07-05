@@ -191,7 +191,7 @@ export class FerrofluidSketch {
             metalness: 0.5,
             envMap: this.cubemapTexture,
             envMapIntensity: 1,
-            roughness: 0,
+            roughness: 0.05,
             side: DoubleSide
         });
         this.extendedMaterial.userData.itemPositions = {
@@ -207,6 +207,9 @@ export class FerrofluidSketch {
                 #include <common>
                 
                 varying vec2 v_uv;
+                varying vec3 v_normal;
+                varying vec3 v_world_position;
+                varying vec3 v_world_normal;
                 
                 uniform vec2 u_itemPositions[${this.ITEM_COUNT}];
                 
@@ -215,17 +218,26 @@ export class FerrofluidSketch {
                     
                     float MAX_HEIGHT = 0.7;
                     float m_dist = 1.;
+                    vec3 nPoint = vec3(0.);
                     float d, falloff;
                     vec2 bending = vec2(0., 0.);
                     for (int i = 0; i < ${this.ITEM_COUNT}; i++) {
                         float dist = distance(pos.xy, u_itemPositions[i] * 2. - 1.);
-                        m_dist = min(m_dist, dist);
+                        if (m_dist > dist) {
+                            m_dist = dist;
+                            nPoint = vec3(u_itemPositions[i], 1.);
+                        }
                     }
                     d = length(pos);
                     falloff = smoothstep(0., 0.95, .8 - d) * MAX_HEIGHT;
+                    nPoint.z *= falloff;
                     distorted.z = smoothstep(1., 0., m_dist / 0.22) * falloff;
                     bending = pos.xy * d * (distorted.z / MAX_HEIGHT) * 2.5;
                     distorted.xy += bending;
+                    
+                    //distorted.z = (1. - m_dist / (0.3 * falloff + d * 0.3)) * falloff;
+                    //bending = pos.xy * d * (distorted.z / MAX_HEIGHT) * 2.5;
+                    //distorted.xy += bending;
                     
                     return distorted;
                 }
@@ -247,6 +259,7 @@ export class FerrofluidSketch {
                     vec3 distortedPosition = vertex_distort(position);
                 
                     objectNormal = normalize(cross(distorted1 - distortedPosition, distorted2 - distortedPosition));
+                    v_normal = vec3(objectNormal);
                     
                     #include <defaultnormal_vertex>
                 `
@@ -263,11 +276,29 @@ export class FerrofluidSketch {
                 vec3 transformed = distortedPosition;
                 `
             );
+            shader.vertexShader = shader.vertexShader.replace(
+                '#include <project_vertex>',
+                `
+                #include <project_vertex>
+                v_world_position = (modelMatrix * vec4(position, 1.0)).xyz;
+                v_world_normal = mat3(modelMatrix) * normalize(objectNormal);
+                `
+            );
+
             shader.fragmentShader = shader.fragmentShader.replace(
                 '#include <common>',
                 `
                 #include <common>
+                
                 varying vec2 v_uv;
+                varying vec3 v_normal;
+                varying vec3 v_world_position;
+                varying vec3 v_world_normal;
+                
+                vec3 palette( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ) {
+                    return a + b*cos( 6.28318*(c*t+d) );
+                }
+                
                 `
             );
             shader.fragmentShader = shader.fragmentShader.replace(
@@ -276,7 +307,32 @@ export class FerrofluidSketch {
                 #include <tonemapping_fragment>
                 vec2 uv = v_uv * 2. - 1.;
                 float falloff = length(uv);
-                gl_FragColor *= 1. - pow(falloff, 3.);
+                vec4 color = vec4(gl_FragColor);
+                
+                vec3 viewWorldDir = normalize(v_world_position - cameraPosition);
+                float i = abs(dot(viewWorldDir, normalize(v_world_normal)));
+                float t = sin((1.0 - i) * 6.) * .5 + .5;
+                float fresnel = max(.1, pow(1. - i, 5.) * 0.3) * 0.5;
+                
+                vec3 p1_a = vec3(0.5, 0.5, 0.5);
+                vec3 p1_b = vec3(0.5, 0.5, 0.5);
+                vec3 p1_c = vec3(2.0, 1.0, 0.0);
+                vec3 p1_d = vec3(0.50, 0.20, 0.25);
+                
+                vec3 p2_a = vec3(0.5, 0.5, 0.5);
+                vec3 p2_b = vec3(0.5, 0.5, 0.5);
+                vec3 p2_c = vec3(1.0, 1.0, 1.0);
+                vec3 p2_d = vec3(0.00, 0.33, 0.67);
+                
+                vec3 p3_a = vec3(0.8, 0.5, 0.4);
+                vec3 p3_b = vec3(0.2, 0.4, 0.2);
+                vec3 p3_c = vec3(2.0, 1.0, 1.0);
+                vec3 p3_d = vec3(0.00, 0.25, 0.25);
+                
+                color += vec4(palette(t, p2_a, p2_b, p2_c, p2_d), 1.) * fresnel;
+                color *= 1. - pow(falloff, 3.);
+                
+                gl_FragColor = color;
                 `
             );
         };
