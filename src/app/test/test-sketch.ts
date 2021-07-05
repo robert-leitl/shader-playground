@@ -20,11 +20,11 @@ export class TestSketch {
     private scene: Scene;
     private renderer: WebGLRenderer;
     private controls: OrbitControls;
-    private uniforms: { [uniform: string]: any };
 
     private vertexShader: string;
     private fragmentShader: string;
     private t1: Texture;
+    private shaderMaterial: ShaderMaterial;
 
     private isDestroyed: boolean = false;
 
@@ -55,24 +55,7 @@ export class TestSketch {
         );
         this.camera.position.z = 2;
         this.scene = new Scene();
-        const geometry = new PlaneBufferGeometry(2, 2);
-
-        this.uniforms = {
-            u_time: { type: '', value: 1.0 },
-            u_resolution: { type: 'v2', value: new Vector2() },
-            u_mouse: { type: 'v2', value: new Vector2() },
-            u_t1: { type: 't', value: this.t1 }
-        };
-
-        const material = new ShaderMaterial({
-            uniforms: this.uniforms,
-            vertexShader: this.vertexShader,
-            fragmentShader: this.fragmentShader
-        });
-
-        const mesh = new Mesh(geometry, material);
-        this.scene.add(mesh);
-
+        this.initObject();
         this.renderer = new WebGLRenderer();
         this.renderer.setPixelRatio(window.devicePixelRatio);
 
@@ -87,11 +70,28 @@ export class TestSketch {
         this.controls.update();
 
         document.onpointermove = (e) => {
-            this.uniforms.u_mouse.value.x = e.pageX;
-            this.uniforms.u_mouse.value.y = e.pageY;
+            this.shaderMaterial.uniforms.u_mouse.value.x = e.pageX;
+            this.shaderMaterial.uniforms.u_mouse.value.y = e.pageY;
         };
 
         if (this.oninit) this.oninit();
+    }
+
+    initObject(): void {
+        const geometry = new PlaneBufferGeometry(2, 2);
+        this.shaderMaterial = new ShaderMaterial({
+            uniforms: {
+                u_time: { value: 1.0 },
+                u_resolution: { value: new Vector2() },
+                u_mouse: { value: new Vector2() },
+                u_t1: { value: this.t1 }
+            },
+            vertexShader: this.vertexShader,
+            fragmentShader: this.fragmentShader
+        });
+
+        const mesh = new Mesh(geometry, this.shaderMaterial);
+        this.scene.add(mesh);
     }
 
     public updateSize(): void {
@@ -99,8 +99,8 @@ export class TestSketch {
             this.container.offsetWidth,
             this.container.offsetHeight
         );
-        this.uniforms.u_resolution.value.x = this.renderer.domElement.width;
-        this.uniforms.u_resolution.value.y = this.renderer.domElement.height;
+        this.shaderMaterial.uniforms.u_resolution.value.x = this.renderer.domElement.width;
+        this.shaderMaterial.uniforms.u_resolution.value.y = this.renderer.domElement.height;
         this.camera.aspect =
             this.container.offsetWidth / this.container.offsetHeight;
         this.camera.updateProjectionMatrix();
@@ -116,7 +116,7 @@ export class TestSketch {
     }
 
     public render(): void {
-        this.uniforms.u_time.value += 0.05;
+        this.shaderMaterial.uniforms.u_time.value += 0.05;
         this.renderer.render(this.scene, this.camera);
     }
 
