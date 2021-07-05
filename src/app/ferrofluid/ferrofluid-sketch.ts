@@ -80,7 +80,7 @@ export class FerrofluidSketch {
     private engine: Engine;
     private physicsScale = 280;
     private focusHandler: FocusHandler;
-    private ITEM_COUNT = 27;
+    private ITEM_COUNT = 26;
 
     //cubemap
     private cubemapPath = 'assets/shared-textures/cube/CoitTower2/';
@@ -170,7 +170,7 @@ export class FerrofluidSketch {
     }
 
     initObject(): void {
-        const geometry = new PlaneBufferGeometry(2, 2, 120, 120);
+        const geometry = new PlaneBufferGeometry(2, 2, 180, 180);
         //const geometry = new TorusBufferGeometry(1, 0.4, 24, 128);
         this.shaderMaterial = new ShaderMaterial({
             uniforms: {
@@ -213,6 +213,19 @@ export class FerrofluidSketch {
                 
                 uniform vec2 u_itemPositions[${this.ITEM_COUNT}];
                 
+                float almostUnitIdentity( float x ) {
+                    return x*x*(2.0-x);
+                }
+                
+                float almostIdentity( float x, float n ) {
+                    return sqrt(x*x+n);
+                }
+                
+                float circularEaseOut (float x){
+                  float y = sqrt(1. - pow(1. - x, 2.));
+                  return y;
+                }
+                
                 vec3 vertex_distort(vec3 pos) {
                     vec3 distorted = vec3(pos);
                     
@@ -225,19 +238,22 @@ export class FerrofluidSketch {
                         float dist = distance(pos.xy, u_itemPositions[i] * 2. - 1.);
                         if (m_dist > dist) {
                             m_dist = dist;
-                            nPoint = vec3(u_itemPositions[i], 1.);
+                            nPoint = vec3(u_itemPositions[i] * 2. - 1., 1.);
                         }
                     }
                     d = length(pos);
-                    falloff = smoothstep(0., 0.95, .8 - d) * MAX_HEIGHT;
+                    falloff = smoothstep(0., 0.95, .9 - d) * MAX_HEIGHT;
                     nPoint.z *= falloff;
-                    distorted.z = smoothstep(1., 0., m_dist / 0.22) * falloff;
+                    /*distorted.z = smoothstep(1., 0., m_dist / 0.22) * falloff;
                     bending = pos.xy * d * (distorted.z / MAX_HEIGHT) * 2.5;
-                    distorted.xy += bending;
+                    distorted.xy += bending;*/
                     
-                    //distorted.z = (1. - m_dist / (0.3 * falloff + d * 0.3)) * falloff;
-                    //bending = pos.xy * d * (distorted.z / MAX_HEIGHT) * 2.5;
-                    //distorted.xy += bending;
+                    float nPointD = length(nPoint.xy) * 0.5;
+                    falloff = smoothstep(0., 0.95, .9 - d) * MAX_HEIGHT;
+                    falloff = circularEaseOut(.8 - d) * MAX_HEIGHT;
+                    distorted.z = (1. - max(0., almostIdentity((m_dist * 50.), 1.) / 12.)) * falloff;
+                    bending = pos.xy * nPointD * (distorted.z / MAX_HEIGHT) * 1.;
+                    distorted.xy += bending;
                     
                     return distorted;
                 }
@@ -247,7 +263,7 @@ export class FerrofluidSketch {
                 '#include <defaultnormal_vertex>',
                 `
                     // source: https://observablehq.com/@k9/calculating-normals-for-distorted-vertices
-                    float tangentFactor = 0.05;
+                    float tangentFactor = 0.03;
                     
                     // tangents can be hardcoded, because we know that a plane is used
                     vec3 tangent1 = vec3(0., 1., 0.);
