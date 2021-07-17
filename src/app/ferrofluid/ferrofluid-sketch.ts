@@ -250,7 +250,7 @@ export class FerrofluidSketch {
                     
                     float nPointD = length(nPoint.xy) * 0.5;
                     falloff = smoothstep(0., 0.95, .9 - d) * MAX_HEIGHT;
-                    falloff = circularEaseOut(.8 - d) * MAX_HEIGHT;
+                    falloff = max(0.1, circularEaseOut(.8 - d)) * MAX_HEIGHT * smoothstep(.9, .6, d) ;
                     distorted.z = (1. - max(0., almostIdentity((m_dist * 50.), 1.) / 12.)) * falloff;
                     bending = pos.xy * nPointD * (distorted.z / MAX_HEIGHT) * 1.;
                     distorted.xy += bending;
@@ -369,7 +369,7 @@ export class FerrofluidSketch {
         this.engine.gravity.scale = 0;
 
         // debugging renderer
-        const render = Render.create({
+        /*const render = Render.create({
             element: this.container,
             engine: this.engine,
             options: {
@@ -382,7 +382,7 @@ export class FerrofluidSketch {
         render.canvas.style.bottom = '0';
         render.canvas.style.left = '0';
         render.canvas.style.zIndex = '1000';
-        Render.run(render);
+        Render.run(render);*/
 
         const COUNT = this.ITEM_COUNT;
         const RADIUS = 20;
@@ -407,7 +407,7 @@ export class FerrofluidSketch {
         this.focusHandler = new FocusHandler(this.engine.world.bodies);
         this.focusHandler.setIndex(0);
 
-        render.canvas.addEventListener('pointerdown', () => {
+        document.body.addEventListener('pointerdown', () => {
             let newFocusIndex = this.focusHandler.index + 1;
             if (newFocusIndex >= 8) newFocusIndex = 0;
             this.focusHandler.setIndex(newFocusIndex);
