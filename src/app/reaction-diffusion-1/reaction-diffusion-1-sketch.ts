@@ -6,6 +6,8 @@ import {
     LinearFilter,
     Mesh,
     MeshBasicMaterial,
+    MirroredRepeatWrapping,
+    Object3D,
     OrthographicCamera,
     PerspectiveCamera,
     PlaneBufferGeometry,
@@ -34,7 +36,6 @@ export class ReactionDiffusion1Sketch {
     private camera: PerspectiveCamera;
     private scene: Scene;
     private renderer: WebGLRenderer;
-    private controls: OrbitControls;
     private raycaster: Raycaster;
 
     private renderMesh: Mesh;
@@ -55,7 +56,7 @@ export class ReactionDiffusion1Sketch {
     private computeRenderTargets: WebGLRenderTarget[] = Array(2).fill(
         undefined
     );
-    private computeStepsInFrame = 12;
+    private computeStepsInFrame = 20;
     private currentRenderTargetIndex = 0;
     private computeSize = 256;
 
@@ -108,8 +109,9 @@ export class ReactionDiffusion1Sketch {
             0.1,
             100
         );
-        this.camera.position.z = 2;
+        this.camera.position.z = 3;
         this.scene = new Scene();
+        this.scene.background = new Color(1, 1, 1);
         this.renderer = new WebGLRenderer({
             premultipliedAlpha: false,
             preserveDrawingBuffer: false,
@@ -123,12 +125,6 @@ export class ReactionDiffusion1Sketch {
         this.container.appendChild(this.renderer.domElement);
 
         this.updateSize();
-
-        this.controls = new OrbitControls(
-            this.camera,
-            this.renderer.domElement
-        );
-        this.controls.update();
 
         document.onpointermove = (e) => {
             this.pointerPosition.x = (e.clientX / window.innerWidth) * 2 - 1;
@@ -195,8 +191,8 @@ export class ReactionDiffusion1Sketch {
                     magFilter: LinearFilter,
                     // the type is very important for the compute shader to work!
                     type: FloatType,
-                    wrapS: RepeatWrapping,
-                    wrapT: RepeatWrapping,
+                    wrapS: MirroredRepeatWrapping,
+                    wrapT: MirroredRepeatWrapping,
                     depthBuffer: false,
                     stencilBuffer: false
                 })
@@ -207,7 +203,7 @@ export class ReactionDiffusion1Sketch {
     }
 
     initObject(): void {
-        const geometry = new PlaneBufferGeometry(2, 2);
+        const geometry = new PlaneBufferGeometry(2.5, 2.5);
         this.renderMaterial = new ShaderMaterial({
             uniforms: {
                 u_time: { value: 1.0 },
@@ -221,7 +217,23 @@ export class ReactionDiffusion1Sketch {
         });
 
         this.renderMesh = new Mesh(geometry, this.renderMaterial);
+        this.renderMesh.rotation.x = -Math.PI / 8;
+        this.renderMesh.position.z += 1.2;
         this.scene.add(this.renderMesh);
+    }
+
+    private focusObject(obj: Object3D): void {
+        const dist = this.camera.position.z;
+        const height = 4.8;
+        this.camera.fov = 2 * (180 / Math.PI) * Math.atan(height / (2 * dist));
+
+        if (this.width / this.height > 1) {
+            obj.scale.x = this.camera.aspect;
+        } else {
+            obj.scale.y = 1 / this.camera.aspect;
+        }
+
+        this.camera.updateProjectionMatrix();
     }
 
     public updateSize(): void {
@@ -232,6 +244,8 @@ export class ReactionDiffusion1Sketch {
 
         this.renderMaterial.uniforms.u_resolution.value.x = this.width;
         this.renderMaterial.uniforms.u_resolution.value.y = this.height;
+
+        this.renderMesh.position.z = Math.max(1.5 - 1000 / this.width, 0.8);
 
         this.camera.aspect =
             this.container.offsetWidth / this.container.offsetHeight;
@@ -245,12 +259,20 @@ export class ReactionDiffusion1Sketch {
         // calculate objects intersecting the picking ray
         const intersects = this.raycaster.intersectObject(this.renderMesh);
         if (intersects.length > 0) {
-            this.renderMeshPointerPosition.copy(intersects[0].point);
+            this.renderMeshPointerPosition.set(
+                intersects[0].uv.x * 2 - 1,
+                intersects[0].uv.y * 2 - 1,
+                0
+            );
             this.computeMaterial.uniforms.u_pointer.value = this.renderMeshPointerPosition;
             this.computeMaterial.uniforms.u_isPointerDown.value = this.isPointerDown;
         }
 
-        this.controls.update();
+        this.scene.rotation.y +=
+            (this.pointerPosition.x / 20 - this.scene.rotation.y) / 16;
+        this.scene.rotation.x +=
+            (-this.pointerPosition.y / 20 - this.scene.rotation.x) / 16;
+
         this.compute();
         this.render();
 

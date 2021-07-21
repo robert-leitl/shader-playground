@@ -7,10 +7,10 @@ uniform vec3 u_pointer;
 uniform bool u_isPointerDown;
 uniform sampler2D u_texture;
 
-float u_diffusionA = 1.0;
-float u_diffusionB = 0.50;
-float u_feedRate = .055;
-float u_killRate = .062;
+float u_diffusionA = 0.9;
+float u_diffusionB = 0.5;
+float u_feedRate = .045;
+float u_killRate = .06;
 float u_timeStep = 1.0;
 float dropperSize = 0.05;
 
@@ -69,15 +69,26 @@ vec4 drawSeed(vec4 pixel, vec2 seedPosition, vec2 pos) {
 
 vec4 react(vec2 pos) {
     vec4 result = texture2D(u_texture, pos);
+    float dist = distance(vec2(.5, .5), pos) * 2.;
     vec4 convolution = laplacian(pos);
 
     float a = result[0];
     float b = result[1];
 
-    float da = u_diffusionA * convolution[0];
-    float db = u_diffusionB * convolution[1];
-    float feed = u_feedRate * (1. - a);
-    float kill = (u_killRate + u_feedRate) * b;
+    float diffusionA = u_diffusionA;
+    float diffusionB = u_diffusionB;
+    float killRate = u_killRate;
+    float feedRate = u_feedRate;
+
+    diffusionA -= dist * 0.31;
+    diffusionB -= dist * 0.31;
+    killRate += (dist * dist) * 0.026;
+    feedRate -= (dist * dist) * 0.002;
+
+    float da = diffusionA * convolution[0];
+    float db = diffusionB * convolution[1];
+    float feed = feedRate * (1. - a);
+    float kill = (killRate + feedRate) * b;
     float reaction = a * (b * b);
 
     result[0] = a + (da - reaction + feed) * u_timeStep;

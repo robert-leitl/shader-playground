@@ -22,6 +22,7 @@ import { ReactionDiffusion1Sketch } from './reaction-diffusion-1-sketch';
                 width: 100%;
                 height: 100%;
                 overflow: hidden;
+                touch-action: none;
             }
         `
     ],
