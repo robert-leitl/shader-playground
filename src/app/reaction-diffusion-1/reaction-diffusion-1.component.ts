@@ -10,14 +10,14 @@ import {
 } from '@angular/core';
 import { fromEvent, Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs/operators';
-import { VoronoiClusterSketch } from './voronoi-cluster-sketch';
+import { ReactionDiffusion1Sketch } from './reaction-diffusion-1-sketch';
 
 @Component({
-    selector: 'voronoi-cluster',
+    selector: 'reaction-diffusion-1',
     template: ``,
     styles: [
         `
-            voronoi-cluster {
+            reaction-diffusion-1 {
                 display: block;
                 width: 100%;
                 height: 100%;
@@ -28,9 +28,9 @@ import { VoronoiClusterSketch } from './voronoi-cluster-sketch';
     encapsulation: ViewEncapsulation.None,
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class VoronoiClusterComponent
+export class ReactionDiffusion1Component
     implements OnInit, AfterViewInit, OnDestroy {
-    private sketch: VoronoiClusterSketch;
+    private sketch: ReactionDiffusion1Sketch;
 
     private _destroyed$: Subject<boolean> = new Subject<boolean>();
 
@@ -39,7 +39,7 @@ export class VoronoiClusterComponent
     ngOnInit(): void {}
 
     ngAfterViewInit(): void {
-        this.sketch = new VoronoiClusterSketch(
+        this.sketch = new ReactionDiffusion1Sketch(
             this.hostElementRef.nativeElement
         );
         this.sketch.oninit = () => {
