@@ -8,6 +8,7 @@ import { Displace1Component } from './displace-1/displace-1.component';
 import { Displace2Component } from './displace-2/displace-2.component';
 import { EvilSpaghettiComponent } from './evil-spaghetti/evil-spaghetti.component';
 import { FerrofluidComponent } from './ferrofluid/ferrofluid.component';
+import { GoochShadingComponent } from './gooch-shading/gooch-shading.component';
 import { Gradient1Component } from './gradient-1/gradient-1.component';
 import { HoloLandscapeComponent } from './holo-landscape/holo-landscape.component';
 import { ImageTransition1Component } from './image-transition-1/image-transition-1.component';
@@ -44,7 +45,8 @@ import { VoronoiClusterComponent } from './voronoi-cluster/voronoi-cluster.compo
         FerrofluidComponent,
         HoloLandscapeComponent,
         VoronoiClusterComponent,
-        ReactionDiffusion1Component
+        ReactionDiffusion1Component,
+        GoochShadingComponent
     ],
     imports: [BrowserModule, AppRoutingModule],
     providers: [],
