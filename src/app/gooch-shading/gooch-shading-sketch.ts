@@ -80,6 +80,10 @@ export class GoochShadingSketch {
             this.camera,
             this.renderer.domElement
         );
+        this.controls.enableDamping = true;
+        this.controls.minPolarAngle = Math.PI / 3;
+        this.controls.maxPolarAngle = (2 / 3) * Math.PI;
+        this.controls.enableZoom = false;
         this.controls.update();
 
         document.onpointermove = (e) => {
@@ -103,11 +107,12 @@ export class GoochShadingSketch {
         });
 
         const mesh = new Mesh(geometry, this.shaderMaterial);
+        mesh.scale.multiplyScalar(0.8);
         this.scene.add(mesh);
     }
 
     initBackground(): void {
-        const geometry = new IcosahedronBufferGeometry(3, 4);
+        const geometry = new IcosahedronBufferGeometry(3, 9);
         this.shaderMaterialBackground = new ShaderMaterial({
             uniforms: {
                 u_time: { value: 1.0 },
