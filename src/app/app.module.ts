@@ -20,6 +20,7 @@ import { Particles2Component } from './particles-2/particles-2.component';
 import { Particles3Component } from './particles-3/particles-3.component';
 import { RayMarching1Component } from './ray-marching-1/ray-marching-1.component';
 import { ReactionDiffusion1Component } from './reaction-diffusion-1/reaction-diffusion-1.component';
+import { RibbonComponent } from './ribbon/ribbon.component';
 import { RippleTransitionComponent } from './ripple-transition/ripple-transition.component';
 import { TestComponent } from './test/test.component';
 import { VoronoiClusterComponent } from './voronoi-cluster/voronoi-cluster.component';
@@ -46,7 +47,8 @@ import { VoronoiClusterComponent } from './voronoi-cluster/voronoi-cluster.compo
         HoloLandscapeComponent,
         VoronoiClusterComponent,
         ReactionDiffusion1Component,
-        GoochShadingComponent
+        GoochShadingComponent,
+        RibbonComponent
     ],
     imports: [BrowserModule, AppRoutingModule],
     providers: [],
