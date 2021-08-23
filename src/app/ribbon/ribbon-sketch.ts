@@ -1,4 +1,5 @@
 import {
+    AmbientLight,
     BasicShadowMap,
     Color,
     DirectionalLight,
@@ -9,6 +10,10 @@ import {
     Matrix4,
     Mesh,
     MeshBasicMaterial,
+    MeshNormalMaterial,
+    MeshStandardMaterial,
+    PCFShadowMap,
+    PCFSoftShadowMap,
     PerspectiveCamera,
     Plane,
     PlaneBufferGeometry,
@@ -96,7 +101,12 @@ class Ribbon {
             this.WIDTH_SEGMENT_COUNT,
             numJoints - 1
         );
-        this.mesh = new Mesh(this.geometry, material);
+        const m: MeshStandardMaterial = new MeshStandardMaterial({
+            color: 0xff0000,
+            side: DoubleSide,
+            shadowSide: DoubleSide
+        });
+        this.mesh = new Mesh(this.geometry, m);
         this.mesh.castShadow = this.mesh.receiveShadow = true;
 
         // create the joints with the geometry vertices
@@ -122,7 +132,7 @@ class Ribbon {
         const rotationMat: Matrix4 = new Matrix4();
         const axis: Vector3 = new Vector3(target.y, -target.x, 0);
         axis.normalize();
-        rotationMat.makeRotationAxis(axis, target.length() * 0.09);
+        rotationMat.makeRotationAxis(axis, target.length() * 0.07);
         this.geometry.applyMatrix4(rotationMat);
 
         for (let i = this.joints.length - 1; i >= 0; i--) {
@@ -202,20 +212,27 @@ export class RibbonSketch {
         this.scene.add(this.raycasterPlaneMesh);
 
         const light = new DirectionalLight(0xffffff, 1);
-        light.position.set(0, 1, 0);
+        light.position.set(0.25, 0.5, 0.5);
+        light.position.multiplyScalar(10);
         light.castShadow = true;
         this.scene.add(light);
 
-        light.shadow.mapSize.width = 512; // default
-        light.shadow.mapSize.height = 512; // default
-        light.shadow.camera.near = 0.1; // default
-        light.shadow.camera.far = 100; // default
+        light.shadow.mapSize.width = 1024; // default
+        light.shadow.mapSize.height = 1024; // default
+        light.shadow.camera.near = 0.01; // default
+        light.shadow.camera.far = 10; // default
+        light.shadow.normalBias = -0.02;
+
+        const ambi = new AmbientLight();
+        ambi.color = new Color(0xf0f0ff);
+        ambi.intensity = 0.6;
+        this.scene.add(ambi);
 
         this.initRibbon();
         this.renderer = new WebGLRenderer();
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = BasicShadowMap;
+        this.renderer.shadowMap.type = PCFShadowMap;
 
         this.container.appendChild(this.renderer.domElement);
 
@@ -246,7 +263,7 @@ export class RibbonSketch {
             side: DoubleSide
         });
 
-        this.ribbon = new Ribbon(400, 0.2, this.shaderMaterial);
+        this.ribbon = new Ribbon(400, 0.3, this.shaderMaterial);
         this.scene.add(this.ribbon.mesh);
     }
 
