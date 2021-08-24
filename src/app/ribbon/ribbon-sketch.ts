@@ -1,6 +1,7 @@
 import {
     AmbientLight,
     BasicShadowMap,
+    CameraHelper,
     Color,
     DirectionalLight,
     DoubleSide,
@@ -160,6 +161,9 @@ export class RibbonSketch {
     private raycaster: Raycaster;
     private raycasterPlaneMesh: Mesh;
     private pointer: Vector2 = new Vector2();
+    private controls: OrbitControls;
+    private directionalLight: DirectionalLight;
+    private shadowCameraHelper: CameraHelper;
 
     private vertexShader: string;
     private fragmentShader: string;
@@ -198,6 +202,7 @@ export class RibbonSketch {
             100
         );
         this.camera.position.z = 2;
+
         this.scene = new Scene();
         this.scene.background = new Color(1, 1, 1);
         this.raycaster = new Raycaster();
@@ -211,21 +216,25 @@ export class RibbonSketch {
         this.raycasterPlaneMesh.visible = false;
         this.scene.add(this.raycasterPlaneMesh);
 
-        const light = new DirectionalLight(0xffffff, 1);
-        light.position.set(0.25, 0.5, 0.5);
-        light.position.multiplyScalar(10);
-        light.castShadow = true;
-        this.scene.add(light);
+        this.directionalLight = new DirectionalLight(0xffffff, 1);
+        const dir: Vector3 = new Vector3(0.25, 0.25, 0.5);
+        dir.normalize().multiplyScalar(10);
+        this.directionalLight.position.copy(dir);
+        this.directionalLight.castShadow = true;
+        this.scene.add(this.directionalLight);
 
-        light.shadow.mapSize.width = 1024; // default
-        light.shadow.mapSize.height = 1024; // default
-        light.shadow.camera.near = 0.01; // default
-        light.shadow.camera.far = 10; // default
-        light.shadow.normalBias = -0.02;
+        this.directionalLight.shadow.mapSize.width = 2048;
+        this.directionalLight.shadow.mapSize.height = 2048;
+        this.directionalLight.shadow.normalBias = -0.015;
+
+        this.shadowCameraHelper = new CameraHelper(
+            this.directionalLight.shadow.camera
+        );
+        //this.scene.add(this.shadowCameraHelper);
 
         const ambi = new AmbientLight();
         ambi.color = new Color(0xf0f0ff);
-        ambi.intensity = 0.6;
+        ambi.intensity = 0.4;
         this.scene.add(ambi);
 
         this.initRibbon();
@@ -237,6 +246,12 @@ export class RibbonSketch {
         this.container.appendChild(this.renderer.domElement);
 
         this.updateSize();
+
+        /*this.controls = new OrbitControls(
+            this.camera,
+            this.renderer.domElement
+        );
+        this.controls.update();*/
 
         document.onpointermove = (e) => {
             this.shaderMaterial.uniforms.u_mouse.value.x = e.pageX;
@@ -277,6 +292,23 @@ export class RibbonSketch {
         this.camera.aspect =
             this.container.offsetWidth / this.container.offsetHeight;
         this.camera.updateProjectionMatrix();
+
+        const h =
+            Math.tan((this.camera.fov * (Math.PI / 180)) / 2) *
+            2 *
+            this.camera.position.z;
+        const w = this.camera.aspect * h;
+        const d = Math.sqrt(w * w + h * h) + 0.2;
+
+        this.directionalLight.shadow.camera.near = 10 - d;
+        this.directionalLight.shadow.camera.far = 10 + d;
+        this.directionalLight.shadow.camera.left = -d;
+        this.directionalLight.shadow.camera.right = d;
+        this.directionalLight.shadow.camera.top = d;
+        this.directionalLight.shadow.camera.bottom = -d;
+        this.directionalLight.shadow.camera.updateProjectionMatrix();
+
+        this.shadowCameraHelper.update();
     }
 
     public animate(): void {
