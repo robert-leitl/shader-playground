@@ -2,6 +2,8 @@
 
 ![Screenshot](https://github.com/robert-leitl/shader-playground/blob/master/cover.jpg?raw=true)
 
+[INDEX](https://robert-leitl.github.io/shader-playground/dist/?debug)
+
 Shader/3D experiments and exercises made with Angular and Three.js.
 
 ## Credits

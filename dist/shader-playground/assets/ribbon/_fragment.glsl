@@ -15,8 +15,8 @@ void main() {
     float shadowPower = 0.5;
 
     gl_FragColor = vec4(v_uv.x, v_uv.y, 1.0, 1.0);
-    //gl_FragColor = vec4(0., 0., .0, 1.0);
-    //gl_FragColor = vec4(n, 1.0);
+    gl_FragColor = vec4(0., 0., .0, 1.0);
+    gl_FragColor = vec4(n, 1.0);
 
     //gl_FragColor = texture2D(u_t1, v_uv);
 }
